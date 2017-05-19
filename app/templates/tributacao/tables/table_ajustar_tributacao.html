@@ -1,0 +1,87 @@
+
+  <form method="post" action="{{ url_for('tributacao.ajusta_tributacao') }}" name="form">
+    {% if produtos %}
+      <input type="hidden" value="table_form" name="table_form"/>
+    {% endif %}
+
+    <table data-toggle="table">
+        <thead>
+            <tr>
+                <th colspan="5" data-halign="center">
+                  <div class="page-header">
+                    <p>
+                      {% if nota %}
+                        {{ 'Nº {0}/{1} - {2} '.format(nota.num_nota, nota.serie_nota, nota.fornecedor.nome) }}
+                      {% endif %}
+                    </p>
+                    <button class="btn btn-primary"> Alterar </button>
+                  </div>
+                </th>
+            </tr>
+            <tr>
+                <th data-sortable="true" rowspan="2">Cod.</th>
+                <th data-sortable="true" rowspan="2">Descrição</th>
+                <th rowspan="2">Fabricante</th>
+                <th>Carga Media</th>
+                <th>Substituido</th>
+            </tr>
+            <tr>
+              <th>
+                <label class="radio-inline">
+                  <input type="radio" class="fix-radio" name="select-radio-1" data-select="carga-media"> Sim
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" class="fix-radio" name="select-radio-1" data-select="incentivo"> Não
+                </label>
+              </th>
+
+              <th>
+                <label class="radio-inline">
+                  <input type="radio" class="fix-radio" name="select-radio-2" data-select="subst"> Sim
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" class="fix-radio" name="select-radio-2" data-select="trib"> Não
+                </label>
+              </th>
+            </tr>
+        </thead>
+        <tbody>
+          {% if produtos %}
+            {% for p in produtos %}
+
+            {% if p.produto_grade_confere.ncm.flag_carga_media == 'T' %}
+              {% set carga_media = 'checked' %}
+              <tr>
+            {% else %}
+              {% set incentivo = 'checked' %}
+              <tr class="text-info">
+            {% endif %}
+                <td>{{ p.id_subproduto }}</td>
+                <td>{{ '{0} {1}'.format(p.produto_grade_confere.produto.descricao, p.produto_grade_confere.sub_descricao) }}</td>
+                <td>{{ p.produto_grade_confere.produto.fabricante }}</td>
+                <td>
+                  <label class="radio-inline">
+                    <input type="radio" class="fix-radio carga-media" name="{{ '{0}-incentivo'.format(p.id_subproduto) }}" id="{{ '{0}-media'.format(p.id_subproduto) }}" value="T" {{ carga_media }}> Sim
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" class="fix-radio incentivo" name="{{ '{0}-incentivo'.format(p.id_subproduto) }}" id="{{ '{0}-inc'.format(p.id_subproduto) }}" value="F" {{ incentivo }}> Não
+                  </label>
+                </td>
+                <td>
+                  <label class="radio-inline">
+                    <input type="radio" class="fix-radio subst" name="{{ '{0}-substituido'.format(p.id_subproduto) }}" id="{{ '{0}-media'.format(p.id_subproduto) }}" value="T" checked> Sim
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" class="fix-radio trib" name="{{ '{0}-substituido'.format(p.id_subproduto) }}" id="{{ '{0}-inc'.format(p.id_subproduto) }}" value="F"> Não
+                  </label>
+                </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+          <tr>
+              <td colspan="5" style="text-align:center">Nenhuma Produto encontrado.</td>
+          </tr>
+          {% endif %}
+        </tbody>
+    </table>
+  </form>

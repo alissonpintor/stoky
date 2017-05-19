@@ -1,0 +1,55 @@
+<form action="{{ url_for('wmserros.informar_erros') }}" method="post" id="erros-form">
+    <div class="form-group" id="form-onda">
+        <label class="control-label" for="id_erro">Número da onda</label>
+        <div class="row">
+            <div class="col-xs-3">
+                <input type="text" class="form-control" name="onda" id="id_onda" placeholder="Digite aqui..." />
+            </div>
+            <div class="col-xs-9">
+                <input type="text" class="form-control" name="cliente" id="nome_cliente" readonly/>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group" id="form-produto">
+        <label class="control-label" for="id_produto">Código do produto</label>
+        <div class="row">
+            <div class="col-xs-3">
+                <input type="text" class="form-control" name="id-produto" id="id_produto" placeholder="Digite aqui..." />
+            </div>
+            <div class="col-xs-9 ">
+                <input type="text" class="form-control" name="descricao-produto" id="descricao_produto" readonly/>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label" for="colaborador">Colaborador</label>
+      <select class="form-control" id="colaborador" name="colaborador" readonly>
+        <option></option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label" for="tipo_tarefa">Selecione o tipo de tarefa</label>
+      <select class="form-control" id="tipo_tarefa" name="tipo-tarefa">
+        <option></option>
+      {% for t in tarefas %}
+        <option value="{{t.id_tarefa}}">{{ t.descricao }}</option>
+      {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label" for="tipo_erro">Selecione o erro</label>
+      <select class="form-control" id="tipo_erro" name="tipo-erro" disabled>
+        <option></option>
+      {% if erros %}
+        {% for e in erros %}
+          <option value="{{e.id_erro}}">{{ e.descricao }}</option>
+        {% endfor %}
+      {% endif %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary" id="form-button">Cadastrar</button>
+</form>

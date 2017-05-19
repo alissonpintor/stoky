@@ -1,0 +1,72 @@
+{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap/wtf.html" as wtf %}
+<br />
+<form action="{{ url_for('metas.metas_vendas') }}" method="post" class="form-group">
+  {{ form.hidden_tag() }}
+  {{ wtf.form_errors(form) }}
+  <div class="row">
+    <div class="col-md-5">
+
+      <div class="col-md-12">
+        <div class="form-group col-md-2">
+         {{ wtf.form_field(form.id_meta, readonly=readonly) }}
+        </div>
+        <div class="form-group col-md-10">
+         {{ wtf.form_field(form.nome_meta) }}
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <div class="form-group col-md-4">
+         {{ wtf.form_field(form.data_inicial) }}
+        </div>
+        <div class="form-group col-md-4">
+         {{ wtf.form_field(form.data_final) }}
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <div class="form-group col-md-5">
+         {{ wtf.form_field(form.valor_meta_minimo, class='form-control money') }}
+        </div>
+        <div class="form-group col-md-5">
+         {{ wtf.form_field(form.valor_meta, class='form-control money') }}
+        </div>
+      </div>
+      {{ wtf.form_field(form.submit) }}
+    </div>
+
+    <div class="col-md-7 v-overflow">
+
+      <table class="table table-condensed">
+        <thead>
+          <tr>
+            <th class="col-md-1">
+              <input class="form-control" id="flag_selecionar" type="checkbox">
+            </th>
+            <th class="col-md-1">Id</th>
+            <th class="col-md-6">Nome</th>
+            <th class="col-md-2">Valor Minimo</th>
+            <th class="col-md-2">valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for vform in form.vendedores %}
+            <tr>
+              <td>{{ vform.flag_selecionar(class='form-control input-sm flag') }}</td>
+              <td>{{ vform.id_vendedor(class='form-control', readonly=readonly) }}</td>
+              <td>{{ vform.nome_vendedor(class='form-control', readonly=readonly) }}</td>
+              <td>{{ vform.valor_meta_minimo(class='form-control money') }}</td>
+              <td>{{ vform.valor_meta(class='form-control money') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-12">
+
+    </div>
+  </div>
+
+</form>
+<br />

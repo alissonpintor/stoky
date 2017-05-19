@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+            <h3>Ajuste de Tributação</h3>
+            <hr />
+    </div>
+    {% include 'messages.html' %}
+    <div class="col-md-12">
+      {% include 'tributacao/forms/form_ajustar_tributacao.html' %}
+    </div>
+    <div class="col-md-12">
+      {% include 'tributacao/tables/table_ajustar_tributacao.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(function() {
+        $('.integer').mask('00000000');
+
+        $('input:radio').bind('click', function(){
+          if($(this).data('select') == 'subst'){
+            $(".trib").each(function(){
+              $(this).removeAttr("checked")
+            });
+
+            $(".subst").each(function(){
+              $(this).attr("checked", "checked")
+            });
+          }
+
+          if($(this).data('select') == 'trib'){
+            $(".subst").each(function(){
+              $(this).removeAttr("checked")
+            });
+
+            $(".trib").each(function(){
+              $(this).attr("checked", "checked")
+            });
+          }
+
+          if($(this).data('select') == 'carga-media'){
+            $(".incentivo").each(function(){
+              $(this).removeAttr("checked")
+            });
+
+            $(".carga-media").each(function(){
+              $(this).attr("checked", "checked")
+            });
+          }
+
+          if($(this).data('select') == 'incentivo'){
+            $(".carga-media").each(function(){
+              $(this).removeAttr("checked")
+            });
+
+            $(".incentivo").each(function(){
+              $(this).attr("checked", "checked")
+            });
+          }
+        })
+    });
+</script>
+{% endblock %}

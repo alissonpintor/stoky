@@ -1,0 +1,43 @@
+<div class="col-md-12">
+   <div role="tabpanel" class="tab-pane">
+        <table id="mytable" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Cod.</th>
+                    <th>Descrição</th>
+                    <th>Ids Wms</th>
+                    <th>Meta</th>
+                    <th>Meta variável</th>
+                    <th>Qtade Min. Colaborador</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% if tarefas %}
+              {% for t in tarefas %}
+                <tr>
+                    <td>
+                        <a class="btn btn-default" href="{{ url_for('wmserros.tarefas', id=t.id_tarefa) }}">
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                        </a>
+                        <a class="btn btn-default detele" href="{{ url_for('wmserros.deletar', path=classe, id=t.id_tarefa) }}">
+                            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+                        </a>
+                    </td>
+                    <td>{{ t.id_tarefa }}</td>
+                    <td>{{ t.descricao }}</td>
+                    <td>{{ t.lista_ids_wms }}</td>
+                    <td>{{ t.valor_meta }}</td>
+                    <td>{{ t.flag_meta_variavel }}</td>
+                    <td>{{ t.qtdade_min_colaborador }}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5">Nenhuma tarefa cadastrada ainda.</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<br />
+<form action="{{ url_for('configuracoes.acessos') }}" method="post" class="form-group">
+  {{ form.hidden_tag() }}
+  {{ wtf.form_errors(form, hiddens='only') }}
+  <div class="row">
+    <div class="form-group col-md-1">
+     {{ wtf.form_field(form.role_id, readonly=readonly) }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group col-md-6">
+     {{ wtf.form_field(form.acesso) }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group col-md-6">
+     {{ wtf.form_field(form.descricao) }}
+    </div>
+  </div>
+
+  {{ wtf.form_field(form.submit) }}
+</form>
+<br />

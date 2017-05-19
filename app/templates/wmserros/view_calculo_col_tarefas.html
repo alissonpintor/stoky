@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% include 'wmserros/forms/form_calculo_col_tarefas.html' %}
+  <hr />
+  {% include 'wmserros/tables/table_calculo_col_tarefas.html' %}
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+  $(function(){
+    $('#data_inicial').mask('00-00-0000');
+    $('#data_final').mask('00-00-0000');
+
+    var monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+    var dayNamesMin = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']
+
+    $( "#data_inicial" ).datepicker();
+    $( "#data_inicial" ).datepicker( "option", "dateFormat", "dd-mm-yy" );
+    $( "#data_inicial" ).datepicker( "option", "monthNames", monthNames );
+    $( "#data_inicial" ).datepicker( "option", "dayNamesMin", dayNamesMin );
+    {% if form.data_inicial.data %}
+      $( "#data_inicial" ).datepicker( "setDate", "{{ form.data_inicial.data }}" );
+    {% endif %}
+
+    $( "#data_final" ).datepicker();
+    $( "#data_final" ).datepicker( "option", "dateFormat", "dd-mm-yy" );
+    $( "#data_final" ).datepicker( "option", "monthNames", monthNames );
+    $( "#data_final" ).datepicker( "option", "dayNamesMin", dayNamesMin );
+    {% if form.data_final.data %}
+      $( "#data_final" ).datepicker( "setDate", "{{ form.data_final.data }}" );
+    {% endif %}
+
+    $("#tempo").bootstrapSlider({
+      step: 5,
+      min: 20,
+      max: 60,
+      value: 30,
+      tooltip: 'always'
+    });
+   });
+
+   var $table = $('#mytable');
+
+   var data = {{ separacao_obj.regioes|tojson }}
+
+   function expandTable(index, row) {
+
+         columns = [
+           {field: 'regiao', title: 'Região'},
+           {field: 'qtdade', title: 'Qtdade de Tarefas'},
+           {field: 'colaborador', title: 'Colaboradores Necessários'}
+         ]
+
+         var result = row[0];
+
+         var data_user = []
+
+         if (result == 'Separação'){
+           $.each(data, function(k, v){
+             console.log(v)
+             data_user.push({
+               'regiao': v['regiao'],
+               'qtdade': v['qtdade'],
+               'colaborador': v['colaborador']
+             })
+           })
+
+           var el = $(document.createElement('table'))
+           $(el).bootstrapTable({
+               dataClasses: 'table table-no-bordered',
+               columns: columns,
+               data: data_user,
+               rowStyle: {classes: 'text-muted'},
+               dataClasses: "table table-no-bordered"
+           });
+           return el;
+         }
+
+   }
+</script>
+{% endblock %}

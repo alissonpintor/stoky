@@ -1,0 +1,40 @@
+<div id="toolbar">
+            <div class="form-inline" role="form">
+                <div class="form-group">
+                  <button id="remove" class="btn btn-danger">
+                    <i class="glyphicon glyphicon-remove"></i> Delete
+                  </button>
+                </div>
+                <div class="form-group">
+                    <span>Offset: </span>
+                    <input name="offset" class="form-control w70" type="number" value="0">
+                </div>
+                <div class="form-group">
+                    <input name="search" class="form-control" type="text" placeholder="Search">
+                </div>
+                <button id="ok" type="submit" class="btn btn-default">OK</button>
+            </div>
+        </div>
+<table id="table"
+       data-toggle="table"
+       data-url="{{ url_for('wmserros.exibir_erros') }}"
+       data-pagination="true"
+       data-side-pagination="server"
+       data-id-field="id_registro"
+       data-page-list="[5, 10, 20, 50, 100, 200]"
+       data-search="true">
+    <thead>
+        <tr>
+            <th data-field="state" data-checkbox="true"></th>
+            <th data-field="id_registro">ID</th>
+            <th data-field="id_onda" data-align="right" data-sortable="true">Onda ID</th>
+            <th data-field="cliente" data-align="center" data-sortable="true">Cliente</th>
+            <th data-field="id_produto" data-sortable="true">Cod.</th>
+            <th data-field="descricao_produto" data-sortable="true">Descrição</th>
+            <th data-field="colaborador" data-sortable="true">Colaborador</th>
+            <th data-field="id_tarefa" data-sortable="true">Tarefa</th>
+            <th data-field="id_erro" data-sortable="true">Erro</th>
+            <th data-field="data_cadastro" data-sortable="true">Data Cadastro</th>
+        </tr>
+    </thead>
+</table>

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+      <h3>Informar Erros dos Colaboradores.</h3>
+      <hr />
+  </div>
+    {% include 'messages.html' %}
+    <div class="col-md-12">
+        {% include 'wmserros/tables/table_exibir_erros.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var $table = $('#table'),
+        $button = $('#remove');
+    $(function () {
+        $button.click(function () {
+            var ids = $.map($table.bootstrapTable('getSelections'), function (row) {
+                return row.id_registro;
+            });
+
+            var data = 'total_remove='+$(ids).length
+            var count = 1
+            $(ids).each(function(key, value){
+              data = data+'&id_'+count+'='+value;
+              count++
+            })
+            console.log(data)
+            $.ajax({
+                type: "GET",
+                url: "{{ url_for('wmserros.exibir_erros') }}",
+                dataType: "json",
+                data: data,
+                success: function(data) {
+
+                  $table.bootstrapTable('remove', {
+                      field: 'id_registro',
+                      values: ids
+                  });
+
+                  alert('Registro excluido com sucesso')
+
+                },
+
+                error: function() {
+                    console.log('Erro ao excluir');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

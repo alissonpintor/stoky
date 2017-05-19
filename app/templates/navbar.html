@@ -1,0 +1,58 @@
+<nav class="navbar navbar-inverse hidden-print">
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="container-fluid">
+      {% if current_user.is_authenticated %}
+        <ul class="nav navbar-nav">
+          {% if current_user.is_admin %}
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Configurações <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ url_for('configuracoes.usuarios') }}">Cadastro de Usuários</a></li>
+                    <li><a href="{{ url_for('configuracoes.acessos') }}">Cadastro de Acessos</a></li>
+                </ul>
+            </li>
+          {% endif %}
+
+          {% if current_user.is_admin or current_user.role.name in ['admin', 'compras'] %}
+            <li class="nav-link"><a href="{{ url_for('tributacao.ajusta_tributacao') }}">Ajustar Tributação<span class="sr-only">(current)</span></a></li>
+          {% endif %}
+
+          {% if current_user.is_admin or current_user.role.name in ['admin', 'vendas'] %}
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Metas <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ url_for('metas.vendedores') }}">Cadastro de vendedores</a></li>
+                    <li><a href="{{ url_for('metas.grupos') }}">Cadastro de grupos</a></li>
+                    <li><a href="{{ url_for('metas.metas_vendas') }}">Cadastro de metas</a></li>
+                    <li><a href="{{ url_for('metas.resultados') }}">Resultado de metas</a></li>
+                </ul>
+            </li>
+          {% endif %}
+
+          {% if current_user.is_admin or current_user.role.name in ['admin', 'logistica'] %}
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Wms Erros <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ url_for('wmserros.parametros') }}">Parametros</a></li>
+                    <li><a href="{{ url_for('wmserros.exibir_metas') }}">Exibir metas</a></li>
+                    <li><a href="{{ url_for('wmserros.calculo_col_tarefas') }}">Caclculo de colaboradores por tarefa</a></li>
+                    <li><a href="{{ url_for('wmserros.tarefas') }}">Cadastro de tarefas</a></li>
+                    <li><a href="{{ url_for('wmserros.erros') }}">Cadastro de Erros</a></li>
+                    <li><a href="{{ url_for('wmserros.informar_erros') }}">Registrar Erros</a></li>
+                    <li><a href="{{ url_for('wmserros.exibir_erros') }}">Erros Registrados</a></li>
+                    <li><a href="{{ url_for('wmserros.erros') }}">Graficos Gerenciais</a></li>
+                </ul>
+            </li>
+            {% endif %}
+
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li class="nav-link"><a href="{{ url_for('auth.logout') }}">Logout <span class="sr-only">(current)</span></a></li>
+        </ul>
+      {% else %}
+        <a href="{{ url_for('wmserros.informar_erros') }}" class="btn btn-default navbar-btn">Registrar Erros</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary navbar-btn">Fazer Login</a>
+      {% endif %}
+
+    </div>
+</nav>

@@ -1,0 +1,46 @@
+{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<br />
+<form action="{{ url_for('wmserros.tarefas') }}" method="post" class="form-group">
+  {{ form.hidden_tag() }}
+  {{ wtf.form_errors(form, hiddens='only') }}
+  <div class="row">
+    <div class="form-group col-md-1">
+     {{ wtf.form_field(form.id_tarefa, readonly=readonly) }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group col-md-6">
+     {{ wtf.form_field(form.nome_tarefa) }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group col-md-4">
+     {{ wtf.form_field(form.lista_ids_wms, class="form-control lista-ids") }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group col-md-4">
+     {{ wtf.form_field(form.valor_meta, class="form-control") }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group col-md-4">
+     {{ wtf.form_field(form.flag_meta_variavel) }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group col-md-4">
+     {{ wtf.form_field(form.qtdade_min_colaborador) }}
+    </div>
+  </div>
+
+  {{ wtf.form_field(form.submit) }}
+</form>
+<br />

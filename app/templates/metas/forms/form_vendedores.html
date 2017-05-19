@@ -1,0 +1,50 @@
+<form action="{{ url_for('metas.vendedores') }}" method="post" id="erros-form" class="form-horizontal">
+  {{ form.csrf_token }}
+    <div class="form-group">
+        <label for="id" class="col-sm-1 control-label">Id</label>
+        <div class="col-sm-1">
+            {{ form.id_vendedor(placeholder="Cod.", class="form-control", readonly="readonly") }}
+        </div>
+    </div>
+    {% if form.errors.id_vendedor_ciss %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="id_ciss" class="col-sm-1 control-label">Cod. Ciss</label>
+        <div class="col-sm-2">
+            {{ form.id_vendedor_ciss(placeholder="Cod. Ciss", class="form-control integer") }}
+            {% for erro in form.errors.id_vendedor_ciss %}
+              <span id="helpBlock2" class="help-block"> {{ erro }} </span>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if form.errors.nome_vendedor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="nome" class="col-sm-1 control-label">Nome</label>
+        <div class="col-sm-6">
+            {{ form.nome_vendedor(placeholder="Nome", class="form-control") }}
+            {% for erro in form.errors.nome_vendedor %}
+              <span id="helpBlock2" class="help-block"> {{ erro }} </span>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-1 col-sm-11">
+            <div class="checkbox">
+                <label>
+                  {{ form.flag_inativo(class="checkbox") }} Inativar
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-1 col-sm-11">
+            {{ form.submit(class="btn btn-default") }}
+        </div>
+    </div>
+</form>

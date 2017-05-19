@@ -1,0 +1,17 @@
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% if messages[0].type == 'success' %}
+      <div class="col-md-12" id="messages">
+        <div class="alert alert-success" role="alert">{{ messages[0].content }}</div>
+      </div>
+    {% elif messages[0].type == 'warning' %}
+      <div class="col-md-12" id="messages">
+        <div class="alert alert-warning" role="alert">{{ messages[0].content }}</div>
+      </div>
+    {% elif messages[0].type == 'error' %}
+      <div class="col-md-12" id="messages">
+        <div class="alert alert-danger" role="alert">{{ messages[0].content }}</div>
+      </div>
+    {% endif %}
+  {% endif %}
+{% endwith %}

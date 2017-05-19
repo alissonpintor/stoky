@@ -1,0 +1,67 @@
+<div class="col-md-12">
+  <form action="/vendedores" method="get" class="form-horizontal hidden-print">
+    <div class="form-group">
+        <label for="metas" class="col-sm-1 control-label">Metas</label>
+        <div class="col-sm-6">
+          <select class="form-control" name="flag_inativo">
+            <option value="ativo">Ativos</option>
+            <option value="inativo">Inativos</option>
+            <option value="todos">Todos</option>
+          </select>
+        </div>
+    </div>
+    <a class="btn btn-default" target="_blank" href="/vendedores?pdf=ok">Gerar PDF</a>
+    <div class="form-group">
+        <div class="col-sm-offset-1 col-sm-11">
+            <button class="btn btn-default">Buscar</button>
+        </div>
+    </div>
+  </form>
+    <div role="tabpanel" class="tab-pane">
+        <table id="mytable" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Cod.</th>
+                    <th>Cod. Ciss</th>
+                    <th>Nome</th>
+                    <th>Inativo</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% if vendedores %}
+              {% for v in vendedores %}
+                {% if v.flag_inativo == False %}
+                <tr>
+                {% else %}
+                <tr class="danger" style="color:red">
+                {% endif %}
+                    <td>
+                        <a class="btn btn-default" href="{{ url_for('metas.vendedores', id=v.id_vendedor) }}">
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                        </a>
+                        <a class="btn btn-default detele" href="{{ url_for('metas.deletar', path=classe, id=v.id_vendedor) }}">
+                            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+                        </a>
+                    </td>
+                    <td>{{ v.id_vendedor }}</td>
+                    <td>{{ v.id_vendedor_ciss }}</td>
+                    <td>{{ v.nome_vendedor }}</td>
+                    <td>
+                      {% if v.flag_inativo %}
+                        Sim
+                      {% else %}
+                        Não
+                      {% endif %}
+                    </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5">Nenhuma Vendedor cadastrado ainda.</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

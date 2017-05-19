@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-6 col-md-offset-3">
+      <h3>Informar Erros dos Colaboradores.</h3>
+      <hr />
+  </div>
+    {% include 'messages.html' %}
+    <div class="col-md-6 col-md-offset-3">
+        {% include 'wmserros/forms/form_informar_erros.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

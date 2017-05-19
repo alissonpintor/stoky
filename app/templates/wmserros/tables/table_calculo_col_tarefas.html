@@ -1,0 +1,42 @@
+<div class="col-md-12">
+    <div role="tabpanel" class="tab-pane">
+
+        <table id="mytable"
+               data-toggle="table"
+               data-classes="table table-no-bordered"
+               data-detail-view="true"
+               data-detail-formatter="expandTable">
+            <thead>
+                <tr>
+                    <th data-sortable="true">Tarefa</th>
+                    <th data-sortable="true">Qtdade Pendente</th>
+                    <th data-sortable="true">Colaboradores Necessários</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% if separacao_obj or conferecia_obj %}
+                {% if separacao_obj %}
+                <tr class="text-info">
+                    <td>Separação</td>
+                    <td>{{ separacao_obj.tarefas }}</td>
+                    <td>{{ '{:.2f}'.format(separacao_obj.qtdade_colab) }}</td>
+                </tr>
+                {% endif %}
+
+                {% if conferecia_obj %}
+                <tr class="text-info">
+                    <td>Conferência</td>
+                    <td>{{ conferecia_obj.tarefas }}</td>
+                    <td>{{ '{:.2f}'.format(conferecia_obj.qtdade_colab) }}</td>
+                </tr>
+                {% endif %}
+            {% else %}
+                <tr>
+                    <td colspan="5">Preencha o periodo desejado.</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

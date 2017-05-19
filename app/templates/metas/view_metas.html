@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+            <h3>Cadastrado das Metas.</h3>
+            <hr />
+    </div>
+    {% include 'messages.html' %}
+    <div class="col-md-12">
+        <div>
+
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Cadastrar Metas</a></li>
+                <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Lista de Metas</a></li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="home">
+                    {% include "metas/forms/form_metas.html" %}
+                </div>
+
+                <div role="tabpanel" class="tab-pane" id="profile">
+                    {% include "metas/tables/table_metas.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(function() {
+        $("#data_inicial").datepicker();
+        $("#data_inicial").datepicker("option", "dateFormat", "dd-mm-yy");
+        $("#data_final").datepicker();
+        $("#data_final").datepicker("option", "dateFormat", "dd-mm-yy");
+
+        $('.money').mask('000000000.00', {
+            reverse: true
+        });
+        $('.integer').mask('000000000');
+
+        $('#flag_selecionar').bind('click', function(){
+            var checked_status = this.checked;
+            $('.flag').each(function(){
+              $(this).prop('checked', checked_status);
+            })
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,109 @@
+from flask_wtf import FlaskForm
+from wtforms import SubmitField, StringField, IntegerField, BooleanField, SelectField, SelectMultipleField
+from wtforms import DateField, DecimalField, FieldList, FormField
+from wtforms.fields.html5 import EmailField
+from wtforms.validators import ValidationError, DataRequired, InputRequired, Regexp, Optional
+
+from decimal import Decimal
+
+def is_decimal(form, field):
+    try:
+        float(field.data)
+    except ValueError:
+        raise ValidationError('informe somente numeros')
+
+class VendedorForm(FlaskForm):
+    id_vendedor = IntegerField('id_vendedor', validators=[], default=0)
+    id_vendedor_ciss = IntegerField('id_vendedor_ciss', validators=[InputRequired(message='Campo Obrigatório')])
+    nome_vendedor = StringField('nome_vendedor', validators=[DataRequired(message='Campo Obrigatório')])
+    flag_inativo = BooleanField('Inativar')
+    submit = SubmitField('Cadastrar', false_values=('false', 'f'), default='f')
+
+class GrupoForm(FlaskForm):
+    id_grupo = IntegerField('id_grupo', validators=None, default=0)
+    nome_grupo = StringField('nome_grupo', validators=[DataRequired(message='Campo Obrigatório')])
+    vendedores = SelectMultipleField('vendedores',
+                                      choices=[],
+                                      coerce=int,
+                                      default='',
+                                      validators=[InputRequired()])
+    submit = SubmitField('Cadastrar')
+
+class VendedorMetasForm(FlaskForm):
+    id_vendedor = IntegerField('id', validators=[], default=0)
+    nome_vendedor = StringField('Nome', validators=[DataRequired(message='Campo Obrigatório')])
+    valor_meta_minimo = StringField('Valor Mínimo', validators=[Optional()])
+    valor_meta = StringField('Valor')
+    flag_selecionar = BooleanField('Selecionar')
+
+    def validate_valor_meta(form, field):
+        v_min = form.valor_meta_minimo.data
+        if form.flag_selecionar.data:
+            is_decimal(form, field)
+            if Decimal(field.data) < 1:
+                raise ValidationError('O valor da meta deve ser maior que 0.')
+            if v_min != '' and Decimal(v_min) > 0:
+                if Decimal(v_min) > Decimal(field.data):
+                    raise ValidationError('O valor da meta deve ser maior que a meta minima.')
+
+    def validate_valor_meta_minimo(form, field):
+        if form.flag_selecionar.data:
+            is_decimal(form, field)
+            if field.data != '' and Decimal(field.data) < 1:
+                raise ValidationError('O valor da meta mínima deve ser maior que 0.')
+
+    class Meta:
+        # This overrides the value from the base form.
+        csrf = False
+
+class MetaVendaForm(FlaskForm):
+    id_meta = IntegerField('Id', validators=None, default=0)
+    nome_meta = StringField('Descrição', validators=[DataRequired(message='Campo Obrigatório')])
+    data_inicial = DateField('Data Inicial', format='%d-%m-%Y', validators=[InputRequired(message='Campo Obrigatório')])
+    data_final = DateField('Data Final', format='%d-%m-%Y', validators=[InputRequired(message='Campo Obrigatório')])
+    valor_meta_minimo = StringField('Valor Mínimo', validators=[Optional(), is_decimal])
+    valor_meta = StringField('Valor', validators=[is_decimal, DataRequired(message='Campo Obrigatório')])
+    flag_inativo = BooleanField('inativo')
+
+    vendedores = FieldList(FormField(VendedorMetasForm), min_entries=0)
+    submit = SubmitField('Cadastrar')
+
+    def validate_valor_meta(form, field):
+        v_min = form.valor_meta_minimo.data
+        soma = 0
+
+        for v in form.vendedores:
+            if v.valor_meta.data != '':
+                soma += Decimal(v.valor_meta.data)
+        if field.data != '' and Decimal(field.data) < soma:
+            raise ValidationError('O valor da meta deve ser maior que a soma da meta dos vendedores.')
+
+        if Decimal(field.data) < 1:
+            raise ValidationError('O valor da meta deve ser maior que 0.')
+
+        if v_min != '' and Decimal(v_min) > 0:
+            if Decimal(v_min) > Decimal(field.data):
+                raise ValidationError('O valor da meta deve ser maior que a meta minima.')
+
+    def validate_valor_meta_minimo(form, field):
+        soma = 0
+        for v in form.vendedores:
+            if v.valor_meta_minimo.data != '':
+                soma += Decimal(v.valor_meta_minimo.data)
+        if field.data != '' and Decimal(field.data) < soma:
+            raise ValidationError('O valor da meta mínima deve ser maior que a soma da meta minima dos vendedores.')
+
+        if field.data != '' and Decimal(field.data) < 1:
+            raise ValidationError('O valor da meta mínima deve ser maior que 0.')
+
+    def validate_data_final(form, field):
+        if field.data < form.data_inicial.data:
+            raise ValidationError('A data final deve ser maior que a inicial.')
+
+class ResultadosForm(FlaskForm):
+    metas = SelectField('Metas',
+                        choices=[],
+                        coerce=int,
+                        default='',
+                        validators=[InputRequired()])
+    submit = SubmitField('Buscar')

@@ -1,0 +1,13 @@
+{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<br />
+<form action="{{ url_for('tributacao.ajusta_tributacao') }}" method="post" class="form-inline">
+  {{ form.hidden_tag() }}
+  {{ wtf.form_errors(form, hiddens='only') }}
+    <div class="form-group">
+     {{ wtf.form_field(form.numero) }}
+    </div>
+     {{ wtf.form_field(form.submit) }}
+</form>
+<br />

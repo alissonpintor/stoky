@@ -1,0 +1,28 @@
+{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<br />
+<form action="{{ url_for('wmserros.erros') }}" method="post" class="form-group">
+  {{ form.hidden_tag() }}
+  {{ wtf.form_errors(form, hiddens='only') }}
+  <div class="row">
+    <div class="form-group col-md-1">
+     {{ wtf.form_field(form.id_erro, readonly=readonly) }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group col-md-6">
+     {{ wtf.form_field(form.nome_erro) }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group col-md-3">
+     {{ wtf.form_field(form.tarefa) }}
+    </div>
+  </div>
+
+     {{ wtf.form_field(form.submit) }}
+</form>
+<br />

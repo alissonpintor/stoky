@@ -1,0 +1,69 @@
+<div class="col-md-12">
+    <div role="tabpanel" class="tab-pane">
+        <table id="mytable" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Cod.</th>
+                    <th>Descrição</th>
+                    <th>Data inicial</th>
+                    <th>Data Final</th>
+                    <th>Valor Mínimo</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% if metas %}
+              {% for me in metas %}
+                <tr>
+                    <td>
+                        <a class="btn btn-default" href="{{ url_for('metas.metas_vendas', id=me.id_meta) }}">
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                        </a>
+                        <a class="btn btn-default" href="{{ url_for('metas.deletar', path=classe, id=me.id_meta) }}">
+                            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+                        </a>
+                    </td>
+                    <td>{{ me.id_meta }}</td>
+                    <td>{{ me.nome_meta }}</td>
+                    <td>{{ me.dt_inicial }}</td>
+                    <td>{{ me.dt_final }}</td>
+                    <td>{{ me.valor_meta_minimo }}</td>
+                    <td>{{ me.valor_meta }}</td>
+                </tr>
+
+                <tr>
+                    <td colspan="5">
+                      <table class="table table-striped table-hover" style="float:right">
+                          <thead>
+                              <tr>
+                                  <th>Cod. Ciss</th>
+                                  <th>Vendedor</th>
+                                  <th>Meta Minima</th>
+                                  <th>Meta</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                          {% for v in me.vendedores %}
+                            <tr>
+                              <td>{{ v.vendedor.id_vendedor_ciss }}</td>
+                              <td>{{ v.vendedor.nome_vendedor }}</td>
+                              <td>{{ v.val_meta_min_vendedor }}</td>
+                              <td>{{ v.val_meta_vendedor }}</td>
+                            </tr>
+                          {% endfor %}
+                          </tbody>
+                      </table>
+                    </td>
+                </tr>
+
+              {% endfor %}
+              {% else %}
+                  <tr>
+                      <td colspan="5">Nenhuma Marca cadastrada ainda.</td>
+                  </tr>
+              {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

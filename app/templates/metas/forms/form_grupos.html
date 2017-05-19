@@ -1,0 +1,32 @@
+<form action="{{ url_for('metas.grupos') }}" method="post" id="grupos_form" class="form-horizontal">
+    {{ form.csrf_token }}
+    <div class="form-group">
+        <label for="id" class="col-sm-1 control-label">Id</label>
+        <div class="col-sm-1">
+            {{ form.id_grupo(class="form-control", readonly="readonly") }}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="nome" class="col-sm-1 control-label">Descrição</label>
+        <div class="col-sm-6">
+          {{ form.nome_grupo(placeholder="Digite o nome...", class="form-control") }}
+        </div>
+          {% if form.errors.nome_grupo %}
+            {{ form.errors.nome_grupo }}
+          {% endif %}
+    </div>
+    <div class="form-group">
+        <label for="vendedores" class="col-sm-1 control-label">Vendedores</label>
+        <div class="col-sm-6">
+          {{ form.vendedores(class="form-control") }}
+        </div>
+          {% if form.errors.vendedores %}
+            {{ form.errors.vendedores }}
+          {% endif %}
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-1 col-sm-11">
+          {{ form.submit(class="btn btn-default") }}
+        </div>
+    </div>
+</form>

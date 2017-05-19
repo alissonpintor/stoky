@@ -1,0 +1,17 @@
+{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap/wtf.html" as wtf %}
+<form action="{{ url_for('wmserros.calculo_col_tarefas') }}" method="post" class="form-inline">
+  <div class="center-block" style="width: 90%">
+
+    {{ form.hidden_tag() }}
+    {{ wtf.form_errors(form, hiddens='only') }}
+
+    {{ wtf.form_field(form.data_inicial) }}
+    {{ wtf.form_field(form.data_final) }}
+
+    {{ wtf.form_field(form.tempo) }}
+
+    {{ wtf.form_field(form.submit, onclick="loading();") }}
+
+  </div>
+</form>

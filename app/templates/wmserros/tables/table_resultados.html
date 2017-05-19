@@ -1,0 +1,91 @@
+<div class="col-md-12">
+    <div role="tabpanel" class="tab-pane">
+
+        <div class="col-md-12">
+          <div class="center-block">
+            <p class="text-primary text-center text-uppercase">
+              <strong> Tarefas do periodo: </strong> {{ count_tarefas }}  /
+              <strong> Colaboradores: </strong> {{ count_colaborador }}  /
+              <strong> Media de pontos periodo: </strong> {{ "{:.2f}".format(pontos_periodo) }} /
+              <strong> Media de pontos por colaborador: </strong> {{ "{:.2f}".format(media_pontos_periodo) }}
+              <strong> Colaboradores Necessários: </strong> {{ "{:.2f}".format(carga_de_trabalho.qtdade_necessaria) }}  /
+            </p>
+          </div>
+          <div class="center-block">
+            <p class="text-muted text-center text-capitalize">
+              {% for tarefa in carga_de_trabalho.tarefas %}
+              <strong> {{  tarefa.descricao }}: </strong> {{ "{:.2f}".format(tarefa.qtdade) }}  /
+              {% endfor %}
+            </p>
+          </div>
+        </div>
+
+        <table id="mytable"
+               data-toggle="table"
+               data-classes="table table-no-bordered"
+               data-detail-view="true"
+               data-detail-formatter="expandTable">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Id</th>
+                    <th data-sortable="true">Colaborador</th>
+                    <th data-sortable="true">Tarefas Realizadas</th>
+                    <th data-sortable="true">Pontuação</th>
+                    <th data-sortable="true">Total Erros</th>
+                    <th data-sortable="true">Pontos Perdidos</th>
+                    <th data-sortable="true">Pontuação Total</th>
+                    <th data-sortable="true">Perc</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% if meta_colaboradores%}
+              {% for c in meta_colaboradores.values() %}
+                {% if c.total.pontos >= media_pontos_periodo %}
+                <tr class="text-success">
+                  <td>
+                    <div>
+                          <span class="glyphicon glyphicon-triangle-top" aria-hidden="true"></span>
+                    <div>
+
+                {% else %}
+                  <tr class="danger text-danger">
+                    <td>
+                      <div>
+                            <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                      <div>
+                {% endif %}
+
+                    </td>
+                    <td>{{ c.id }}</td>
+                    <td>{{ c.colaborador|capitalize }}</td>
+                    <td>{{ c.total.qtdade }}</td>
+                    <td>{{ "{:.2f}".format(c.total.p_qtdade) }}</td>
+                    <td>{{ c.total.erros }}</td>
+
+                    {% if c.total.p_erros > 0 %}
+                    <td class="text-danger">
+                       <span class="glyphicon glyphicon-minus-sign" aria-hidden="true">
+                         {{ "{:.2f}".format(c.total.p_erros) }}
+                       </span>
+                    </td>
+                    {% else %}
+                    <td>
+                         {{ "{:.2f}".format(c.total.p_erros) }}
+                    </td>
+                    {% endif %}
+
+                    <td>{{ "{:.2f}".format(c.total.pontos) }}</td>
+                    <td>{{ "{:.2f}%".format((c.total.pontos*100)/media_pontos_periodo) }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5">Preencha o periodo desejado.</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

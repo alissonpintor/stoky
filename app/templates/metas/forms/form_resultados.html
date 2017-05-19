@@ -1,0 +1,15 @@
+<form action="{{ url_for('metas.resultados') }}" method="post" class="form-horizontal">
+  {{ form.csrf_token }}
+  <div class="form-group">
+      <label for="metas" class="col-sm-1 control-label">Metas</label>
+      <div class="col-sm-6">
+        {{ form.metas(class="form-control", placeholder="--select--") }}
+        {{ form.erros }}
+      </div>
+  </div>
+  <div class="form-group">
+      <div class="col-sm-offset-1 col-sm-11">
+          {{ form.submit(class="btn btn-default", onclick="loading();") }}
+      </div>
+  </div>
+</form>

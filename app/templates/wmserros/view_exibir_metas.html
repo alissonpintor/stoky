@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+  {% include "wmserros/forms/form_exibir_metas.html" %}
+  {% include "wmserros/tables/table_resultados.html" %}
+{% endblock %}
+{% block scripts %}
+
+<script>
+  $(function(){
+
+    $('#colaborador').multiSelect()
+    $('#tarefas').multiSelect()
+
+    $('#data_inicial').mask('00-00-0000');
+    $('#data_final').mask('00-00-0000');
+
+    var monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+    var dayNamesMin = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']
+
+    $( "#data_inicial" ).datepicker();
+    $( "#data_inicial" ).datepicker( "option", "dateFormat", "dd-mm-yy" );
+    $( "#data_inicial" ).datepicker( "option", "monthNames", monthNames );
+    $( "#data_inicial" ).datepicker( "option", "dayNamesMin", dayNamesMin );
+    {% if form.data_inicial.data %}
+      $( "#data_inicial" ).datepicker( "setDate", "{{ form.data_inicial.data }}" );
+    {% endif %}
+
+    $( "#data_final" ).datepicker();
+    $( "#data_final" ).datepicker( "option", "dateFormat", "dd-mm-yy" );
+    $( "#data_final" ).datepicker( "option", "monthNames", monthNames );
+    $( "#data_final" ).datepicker( "option", "dayNamesMin", dayNamesMin );
+    {% if form.data_final.data %}
+      $( "#data_final" ).datepicker( "setDate", "{{ form.data_final.data }}" );
+    {% endif %}
+
+  });
+
+  var $table = $('#mytable');
+
+  var data = {{ meta_colaboradores|tojson }}
+
+  function expandTable(index, row) {
+
+        columns = [
+          {field: 'tarefa', title: 'Tarefa'},
+          {field: 'qtdade', title: 'Qtdade'},
+          {field: 'p_qtdade', title: 'Pontos'},
+          {field: 'erros', title: 'Erros'},
+          {field: 'p_erros', title: 'Pontos Erros'},
+          {field: 'pontos', title: 'Pontos Total'},
+        ]
+
+        var result = (data[row[1]]);
+        console.log(result);
+        var data_user = []
+
+        $.each(result, function(k, v){
+          if ( $.inArray(k, ['total', 'colaborador', 'id']) == -1 ){
+            data_user.push({
+              'tarefa': k,
+              'qtdade': v['qtdade'],
+              'p_qtdade': v['p_qtdade'].toFixed(2),
+              'erros': v['erros'],
+              'p_erros': v['p_erros'].toFixed(2),
+              'pontos': v['pontos']
+            })
+          }
+        });
+
+        var el = $(document.createElement('table'))
+        $(el).bootstrapTable({
+            dataClasses: 'table table-no-bordered',
+            columns: columns,
+            data: data_user
+        });
+        return el;
+  }
+</script>
+{% endblock %}
