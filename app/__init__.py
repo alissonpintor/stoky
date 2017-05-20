@@ -3,15 +3,23 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_principal import Principal, Permission, RoleNeed
+from flask_migrate import Migrate
 
-app = Flask(__name__)
+from config import app_config
+
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_object(app_config['development'])
+app.config.from_pyfile('config.py')
+
+'''
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_BINDS'] = {'ciss': 'db2+ibm_db://dba:overhead@192.168.104.3:50000/STOKY',
-                                  'wms': 'oracle://fullwms:fullwms@192.168.104.4'}
+                                  'wms' : 'oracle://fullwms:fullwms@192.168.104.4'}
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.secret_key = 'some_secret'
+'''
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -19,6 +27,7 @@ login_manager.login_message = {'type': 'warning', 'content': "Você precisa esta
 login_manager.login_view = "auth.login"
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 from app import models
 db.create_all(bind=None)
 
