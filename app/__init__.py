@@ -28,9 +28,15 @@ vendas_permission = Permission(RoleNeed('admin'), RoleNeed('vendas'))
 logistica_permission = Permission(RoleNeed('admin'), RoleNeed('logistica'))
 
 exist_admin = db.session.query(db.exists().where(models.User.username == 'admin')).scalar()
+exist_admin_role = db.session.query(db.exists().where(models.Role.name == 'admin')).scalar()
 if not exist_admin:
     admin = models.User(email="admin@admin.com",username="admin",password="admin2016",is_admin=True)
     db.session.add(admin)
+    db.session.commit()
+
+if not exist_admin_role:
+    admin_role = models.Role(name="admin", description="Acesso admin")
+    db.session.add(admin_role)
     db.session.commit()
 
 from .configuracoes import configuracoes as configuracoes_blueprint
