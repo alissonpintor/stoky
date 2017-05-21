@@ -140,6 +140,7 @@ def tarefas(id=None):
         tarefa.lista_ids_wms = form.lista_ids_wms.data
         tarefa.valor_meta = form.valor_meta.data
         tarefa.flag_meta_variavel = form.flag_meta_variavel.data
+        tarefa.qtdade_min_colaborador = form.qtdade_min_colaborador.data
 
         try:
             db.session.add(tarefa)
@@ -160,6 +161,7 @@ def tarefas(id=None):
             form.lista_ids_wms.data = tarefa.lista_ids_wms
             form.valor_meta.data = tarefa.valor_meta
             form.flag_meta_variavel.data = tarefa.flag_meta_variavel
+            form.qtdade_min_colaborador.data = tarefa.qtdade_min_colaborador
         except Exception as e:
             message = {'type': 'warning', 'content': 'Erro ao alterar registro. -- %s'%(e)}
             flash(message)
