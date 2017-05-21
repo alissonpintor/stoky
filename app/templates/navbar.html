@@ -24,6 +24,7 @@
                     <li><a href="{{ url_for('metas.vendedores') }}">Cadastro de vendedores</a></li>
                     <li><a href="{{ url_for('metas.grupos') }}">Cadastro de grupos</a></li>
                     <li><a href="{{ url_for('metas.metas_vendas') }}">Cadastro de metas</a></li>
+                    <li role="separator" class="divider"></li>
                     <li><a href="{{ url_for('metas.resultados') }}">Resultado de metas</a></li>
                 </ul>
             </li>
@@ -35,10 +36,13 @@
                 <ul class="dropdown-menu">
                     <li><a href="{{ url_for('wmserros.parametros') }}">Parametros</a></li>
                     <li><a href="{{ url_for('wmserros.exibir_metas') }}">Exibir metas</a></li>
-                    <li><a href="{{ url_for('wmserros.calculo_col_tarefas') }}">Caclculo de colaboradores por tarefa</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><a href="{{ url_for('wmserros.calculo_col_tarefas') }}">Colaboradores por tarefa</a></li>
+                    <li role="separator" class="divider"></li>
                     <li><a href="{{ url_for('wmserros.tarefas') }}">Cadastro de tarefas</a></li>
                     <li><a href="{{ url_for('wmserros.erros') }}">Cadastro de Erros</a></li>
                     <li><a href="{{ url_for('wmserros.informar_erros') }}">Registrar Erros</a></li>
+                    <li role="separator" class="divider"></li>
                     <li><a href="{{ url_for('wmserros.exibir_erros') }}">Erros Registrados</a></li>
                     <li><a href="{{ url_for('wmserros.erros') }}">Graficos Gerenciais</a></li>
                 </ul>

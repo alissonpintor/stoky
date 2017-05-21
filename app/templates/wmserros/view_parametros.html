@@ -13,7 +13,7 @@
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Parametros Metas</a></li>
-                <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Parametros</a></li>
+                <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Parametros Cadastrados</a></li>
             </ul>
 
             <!-- Tab panes -->
@@ -23,6 +23,7 @@
                 </div>
 
                 <div role="tabpanel" class="tab-pane" id="profile">
+                  {% include 'wmserros/tables/table_parametros_metas.html' %}
                 </div>
             </div>
         </div>
@@ -32,7 +33,7 @@
 
 {% block scripts %}
 <script>
-  $('.lista-ids').mask('0#,#');
   $('#colaboradores_excluidos').multiSelect()
+  $('.float').mask('#0.00', {reverse: true});
 </script>
 {% endblock %}

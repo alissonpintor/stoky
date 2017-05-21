@@ -75,5 +75,13 @@
         });
         return el;
   }
+
+  function percentSorter(a, b){
+    a = parseFloat(a.replace('$', '')); // remove $
+    b = parseFloat(b.replace('$', ''));
+    if (a > b) return 1;
+    if (a < b) return -1;
+    return 0;
+  }
 </script>
 {% endblock %}

@@ -27,6 +27,14 @@ def parseStrToFloat(value):
     value = value.replace(',','.')
     return value
 
+def format_date(userdate):
+    date = dateparser.parse(userdate, date_formats=['%Y-%m-%d'])
+    print(date)
+    try:
+        return datetime.strftime(date)
+    except TypeError:
+        return None
+
 # ROTA USADA PARA DELETAR OS REGISTROS
 @metas.route('/deletar/<path>/<id>')
 @login_required
@@ -178,8 +186,8 @@ def metas_vendas(id=None):
                 redirect(url_for('metas.metas_vendas'))
 
         meta_venda.nome_meta = form.nome_meta.data
-        meta_venda.dt_inicial = form.data_inicial.data
-        meta_venda.dt_final = form.data_final.data
+        meta_venda.dt_inicial = dateparser.parse(form.data_inicial.data, date_formats=['%d-%m-%Y'])
+        meta_venda.dt_final = dateparser.parse(form.data_final.data, date_formats=['%d-%m-%Y'])
         meta_venda.valor_meta = Decimal(form.valor_meta.data)
         meta_venda.valor_meta_minimo = None
         if form.valor_meta_minimo.data != '':
@@ -213,8 +221,8 @@ def metas_vendas(id=None):
             meta = MetaVendas.query.filter(MetaVendas.id_meta == id).one()
             form.id_meta.data = meta.id_meta
             form.nome_meta.data = meta.nome_meta
-            form.data_inicial.data = meta.dt_inicial
-            form.data_final.data = meta.dt_final
+            form.data_inicial.data = meta.dt_inicial.strftime('%d-%m-%Y')
+            form.data_final.data = meta.dt_final.strftime('%d-%m-%Y')
             form.valor_meta_minimo.data = meta.valor_meta_minimo
             form.valor_meta.data = meta.valor_meta
 
@@ -277,7 +285,9 @@ def resultados():
 
         for v in meta.vendedores:
             # Define as colunas que vao ser retornadas na consulta em StokyMetasView
-            query_ciss = db.session.query((db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('val_liquido'))
+            query_ciss = db.session.query(db.func.sum(StokyMetasView.val_venda).label('val_bruto'),\
+                                          db.func.sum(StokyMetasView.val_devolucao).label('val_dev'),\
+                                          (db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('val_liquido'))
 
             # Define os filtros da consulta
             query_ciss = query_ciss.filter(StokyMetasView.dt_movimento.between(meta.dt_inicial, meta.dt_final))\
@@ -285,6 +295,8 @@ def resultados():
             vendedor = {}
             vendedor['id_ciss'] = v.vendedor.id_vendedor_ciss
             vendedor['nome_vendedor'] = v.vendedor.nome_vendedor
+            vendedor['val_bruto'] = query_ciss.val_bruto if query_ciss.val_bruto else 0
+            vendedor['val_dev'] = query_ciss.val_dev if query_ciss.val_dev else 0
             vendedor['val_vendido'] = query_ciss.val_liquido
             vendedor['val_meta_minimo'] = v.val_meta_min_vendedor
             vendedor['val_meta'] = v.val_meta_vendedor
@@ -294,16 +306,22 @@ def resultados():
         total_grupo['perc'] = (total_grupo['valor'] * 100)/meta.valor_meta
 
         # Define as colunas que vao ser retornadas na consulta em StokyMetasView
-        outros = db.session.query((db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('val_liquido'))
+        outros = db.session.query(db.func.sum(StokyMetasView.val_venda).label('val_bruto'),\
+                                  db.func.sum(StokyMetasView.val_devolucao).label('val_dev'),\
+                                  (db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('val_liquido'))
 
         # Define os filtros da consulta
         outros = outros.filter(StokyMetasView.dt_movimento.between(meta.dt_inicial, meta.dt_final))\
                                .filter(~StokyMetasView.id_vendedor.in_(id_vendedores)).one()
 
         # Define as colunas que vao ser retornadas na consulta em StokyMetasView
-        query_total_vendas = db.session.query((db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('valor'))
+        query_total_vendas = db.session.query(db.func.sum(StokyMetasView.val_venda).label('val_bruto'),\
+                                              db.func.sum(StokyMetasView.val_devolucao).label('val_dev'),\
+                                              (db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('valor'))
         # Define os filtros da consulta
         query_total_vendas = query_total_vendas.filter(StokyMetasView.dt_movimento.between(meta.dt_inicial, meta.dt_final)).one()
+        total_vendas['val_bruto'] = query_total_vendas.val_bruto
+        total_vendas['val_dev'] = query_total_vendas.val_dev
         total_vendas['valor'] = query_total_vendas.valor
         total_vendas['perc'] = (query_total_vendas.valor * 100)/meta.valor_meta
 

@@ -33,10 +33,27 @@
 {% block scripts %}
 <script>
     $(function() {
-        $("#data_inicial").datepicker();
-        $("#data_inicial").datepicker("option", "dateFormat", "dd-mm-yy");
-        $("#data_final").datepicker();
-        $("#data_final").datepicker("option", "dateFormat", "dd-mm-yy");
+        $('#data_inicial').mask('00-00-0000');
+        $('#data_final').mask('00-00-0000');
+
+        var monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+        var dayNamesMin = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']
+
+        $( "#data_inicial" ).datepicker();
+        $( "#data_inicial" ).datepicker( "option", "dateFormat", "dd-mm-yy" );
+        $( "#data_inicial" ).datepicker( "option", "monthNames", monthNames );
+        $( "#data_inicial" ).datepicker( "option", "dayNamesMin", dayNamesMin );
+        {% if form.data_inicial.data %}
+          $( "#data_inicial" ).datepicker( "setDate", "{{ form.data_inicial.data }}" );
+        {% endif %}
+
+        $( "#data_final" ).datepicker();
+        $( "#data_final" ).datepicker( "option", "dateFormat", "dd-mm-yy" );
+        $( "#data_final" ).datepicker( "option", "monthNames", monthNames );
+        $( "#data_final" ).datepicker( "option", "dayNamesMin", dayNamesMin );
+        {% if form.data_final.data %}
+          $( "#data_final" ).datepicker( "setDate", "{{ form.data_final.data }}" );
+        {% endif %}
 
         $('.money').mask('000000000.00', {
             reverse: true

@@ -26,8 +26,8 @@
                     </td>
                     <td>{{ me.id_meta }}</td>
                     <td>{{ me.nome_meta }}</td>
-                    <td>{{ me.dt_inicial }}</td>
-                    <td>{{ me.dt_final }}</td>
+                    <td>{{ me.dt_inicial.strftime('%d-%m-%Y') }}</td>
+                    <td>{{ me.dt_final.strftime('%d-%m-%Y') }}</td>
                     <td>{{ me.valor_meta_minimo }}</td>
                     <td>{{ me.valor_meta }}</td>
                 </tr>
