@@ -54,7 +54,7 @@ class BuscarMetasForm(FlaskForm):
 class BuscarPeriodoForm(FlaskForm):
     data_inicial = StringField('Data Inicial')
     data_final = StringField('Data Final')
-    tempo = IntegerField('Tempo Max.', default=60)
+    tempo = IntegerField('Tempo Max.', default=30)
     submit = SubmitField('Buscar')
 
     def validate_data_final(form, field):

@@ -32,11 +32,12 @@
       $( "#data_final" ).datepicker( "setDate", "{{ form.data_final.data }}" );
     {% endif %}
 
+    var tempo = {{ form.tempo.data if form.tempo.data is defined else 30 }}
     $("#tempo").bootstrapSlider({
       step: 5,
       min: 20,
       max: 60,
-      value: 30,
+      value: tempo,
       tooltip: 'always'
     });
    });
