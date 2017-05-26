@@ -25,6 +25,7 @@ from .. import app
 from ..models import Tarefas, Erros, RegistroDeErros, WmsOnda, WmsColaborador
 from ..models import WmsItems, WmsSeparadoresTarefas, PontuacaoMetaLogistica
 from ..models import MetaTarefa, ParametrosMetas, WmsTarefasCd, WmsPredio, WmsRegiaoSeparacao
+from ..models import ViewSaldoProduto
 
 # Formularios
 from .forms import TarefasForm, ErrosForm, BuscarMetasForm
@@ -586,3 +587,22 @@ def json_error_response(error_code=500):
     json = jsonify()
     json.status_code = error_code
     return json
+
+# RELATORIOS
+@wmserros.route("/export", methods=['GET'])
+def export():
+    query_sets = ViewSaldoProduto.query.all()
+    result = []
+    column_names = ['id', 'qtdade']
+    result.append(column_names)
+
+    for q in query_sets:
+        value = [q.id_subproduto, q.qtd_atual]
+        result.append(value)
+
+    return excel.make_response_from_array(result, "xlsx", file_name='rel.xlsx')
+
+
+@wmserros.route("/export_array", methods=['GET'])
+def export_array():
+    return excel.make_response_from_array([[1,2], [3, 4]], "xlsx", file_name='rel.xlsx')

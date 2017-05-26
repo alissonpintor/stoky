@@ -147,6 +147,16 @@ class ProdutoTributacao(db.Model):
     id_sit_trib = db.Column('IDSITTRIBENT', db.Integer())
     tipo_trib_ent = db.Column('TIPOSITTRIBENT', db.Integer())
 
+class ViewSaldoProduto(db.Model):
+    __bind_key__ = 'ciss'
+    __tablename__ = 'PRODUTOS_SALDOS_VIEW'
+    id_produto = db.Column('IDPRODUTO', db.Integer, primary_key=True)
+    id_subproduto = db.Column('IDSUBPRODUTO', db.Integer, primary_key=True)
+    id_empresa = db.Column('IDEMPRESA', db.Integer, primary_key=True)
+    qtd_atual = db.Column('QTDATUALESTOQUE', db.Numeric(10,2))
+    qtd_disponivel = db.Column('QTDDISPONIVEL', db.Numeric(10,2))
+    qtd_reserva = db.Column('QTDSALDORESERVA', db.Numeric(10,2))
+
 
 
 """

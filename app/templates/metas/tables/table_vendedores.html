@@ -1,5 +1,5 @@
 <div class="col-md-12">
-  <form action="/vendedores" method="get" class="form-horizontal hidden-print">
+  <form action="{{ url_for('metas.vendedores') }}" method="get" class="form-horizontal hidden-print">
     <div class="form-group">
         <label for="metas" class="col-sm-1 control-label">Metas</label>
         <div class="col-sm-6">
@@ -10,7 +10,6 @@
           </select>
         </div>
     </div>
-    <a class="btn btn-default" target="_blank" href="/vendedores?pdf=ok">Gerar PDF</a>
     <div class="form-group">
         <div class="col-sm-offset-1 col-sm-11">
             <button class="btn btn-default">Buscar</button>

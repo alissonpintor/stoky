@@ -77,3 +77,6 @@ class ErrosForm(FlaskForm):
     nome_erro = StringField('Descrição', validators=[DataRequired(message='Campo Obrigatório')])
     tarefa = SelectField('Tarefa', choices=[], coerce=int, validators=[DataRequired(message='Campo Obrigatório')])
     submit = SubmitField('Cadastrar')
+
+
+# Formularios dos Relatorios

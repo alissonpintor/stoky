@@ -69,11 +69,6 @@ def deletar(path, id):
 @login_required
 @vendas_permission.require(http_exception=401)
 def vendedores(id=None):
-    if request.args.get('pdf'):
-        vendedores = Vendedor.query.all()
-        html = render_template('metas/relatorios/pdf_vendedores.html', vendedores=vendedores)
-        return render_pdf(HTML(string=html))
-
     vendedores = Vendedor.query.filter(Vendedor.flag_inativo == False)
     active_table = {}
     active_table['tab1'] = 'active'
