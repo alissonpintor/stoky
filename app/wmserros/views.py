@@ -590,6 +590,8 @@ def json_error_response(error_code=500):
 
 # RELATORIOS
 @wmserros.route("/export", methods=['GET'])
+@login_required
+@logistica_permission.require(http_exception=401)
 def export():
     query = db.session.query(EstoqueSaldo.id_subproduto, ViewProduto.descricao,\
                              ViewProduto.fabricante, EstoqueSaldo.qtd_atual)
