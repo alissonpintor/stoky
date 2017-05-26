@@ -125,6 +125,19 @@ class ProdutoGrade(db.Model):
                                                             "ProdutoGrade.id_subproduto == ProdutoTributacao.id_subproduto)",
                                           backref='produto_grade_tributacao')
 
+class EstoqueSaldo(db.Model):
+    __bind_key__  = 'ciss'
+    __tablename__ = 'ESTOQUE_SALDO_ATUAL'
+    id_produto = db.Column('IDPRODUTO', db.ForeignKey('PRODUTOS_VIEW.IDPRODUTO'), primary_key=True)
+    id_subproduto = db.Column('IDSUBPRODUTO', db.ForeignKey('PRODUTOS_VIEW.IDSUBPRODUTO'), primary_key=True)
+    id_estoque = db.Column('IDLOCALESTOQUE', db.Integer, primary_key=True)
+    id_empresa = db.Column('IDEMPRESA', db.Integer, primary_key=True)
+    qtd_atual = db.Column('QTDATUALESTOQUE', db.Numeric(10,2))
+
+    v_produto = db.relationship('ViewProduto',
+                                primaryjoin="and_(EstoqueSaldo.id_produto == ViewProduto.id_produto, "
+                                            "EstoqueSaldo.id_subproduto == ViewProduto.id_subproduto)")
+
 class ConfereMercadoria(db.Model):
     __bind_key__ = 'ciss'
     __tablename__ = 'CONFERE_MERCADORIA'
@@ -147,15 +160,29 @@ class ProdutoTributacao(db.Model):
     id_sit_trib = db.Column('IDSITTRIBENT', db.Integer())
     tipo_trib_ent = db.Column('TIPOSITTRIBENT', db.Integer())
 
+class ViewProduto(db.Model):
+    __bind_key__ = 'ciss'
+    __tablename__ = 'PRODUTOS_VIEW'
+    id_produto = db.Column('IDPRODUTO', db.Integer, primary_key=True)
+    id_subproduto = db.Column('IDSUBPRODUTO', db.Integer, primary_key=True)
+    descricao = db.Column('DESCRICAOPRODUTO', db.String(100))
+    fabricante = db.Column('FABRICANTE', db.String(50))
+    flag_inativo = db.Column('FLAGINATIVO', db.String(1), db.CheckConstraint("flag_inativo=='T' or flag_inativo=='F'"))
+
 class ViewSaldoProduto(db.Model):
     __bind_key__ = 'ciss'
     __tablename__ = 'PRODUTOS_SALDOS_VIEW'
-    id_produto = db.Column('IDPRODUTO', db.Integer, primary_key=True)
-    id_subproduto = db.Column('IDSUBPRODUTO', db.Integer, primary_key=True)
+    id_produto = db.Column('IDPRODUTO', db.ForeignKey('PRODUTOS_VIEW.IDPRODUTO'), primary_key=True)
+    id_subproduto = db.Column('IDSUBPRODUTO', db.ForeignKey('PRODUTOS_VIEW.IDSUBPRODUTO'), primary_key=True)
     id_empresa = db.Column('IDEMPRESA', db.Integer, primary_key=True)
     qtd_atual = db.Column('QTDATUALESTOQUE', db.Numeric(10,2))
     qtd_disponivel = db.Column('QTDDISPONIVEL', db.Numeric(10,2))
     qtd_reserva = db.Column('QTDSALDORESERVA', db.Numeric(10,2))
+
+    v_produto = db.relationship('ViewProduto',
+                                primaryjoin="and_(ViewSaldoProduto.id_produto == ViewProduto.id_produto, "
+                                            "ViewSaldoProduto.id_subproduto == ViewProduto.id_subproduto)",
+                                backref=db.backref('v_produto_saldo'))
 
 
 
@@ -234,12 +261,6 @@ class Marcas(db.Model):
     id = db.Column('IDMARCAFABRICANTE', db.Integer, primary_key=True)
     descricao = db.Column('DESCRICAO', db.String(100))
 
-class ProdutosView(db.Model):
-    __bind_key__ = 'ciss'
-    __tablename__ = 'PRODUTOS_VIEW'
-    id_subproduto = db.Column('IDSUBPRODUTO', db.Integer, primary_key=True)
-    descricao = db.Column('DESCRICAOPRODUTO', db.String(100))
-
 class StokyMetasView(db.Model):
     __bind_key__ = 'ciss'
     __tablename__ = 'STOKY_METAS'
@@ -256,7 +277,7 @@ class StokyMetasView(db.Model):
 
     #empresa = db.relationship('Empresa', backref=db.backref('id_empresa', order_by=id_empresa))
     vendedor = db.relationship("ClienteFornecedor", backref=db.backref('id_vendedor', order_by=id_vendedor))
-    produto = db.relationship('ProdutosView', backref=db.backref('id_produto', order_by=id_produto))
+    produto = db.relationship('ViewProduto', backref=db.backref('meta', order_by=id_produto))
     marca = db.relationship('Marcas', backref=db.backref('id_marca', order_by=id_marca))
 
 """
@@ -348,18 +369,26 @@ class WmsRegiaoSeparacao(db.Model):
     id_empresa = db.Column('EMPR_CODEMP', db.Integer, primary_key=True)
     descricao = db.Column('DESCRICAO', db.String(50))
 
-class WmsPredio(db.Model):
-    __bind_key__ = 'wms'
-    __tablename__ = 'WMS_PREDIOS'
-    id_predio = db.Column('PREDIO_ID', db.Integer, primary_key=True)
-    cod_predio = db.Column('COD_PREDIO', db.String(4))
-    id_rua = db.Column('RUASARM_COD_RUASARM', db.String(5))
-    id_regiao = db.Column('REGIAO_SEPARACAO', db.ForeignKey('WMS_REGIOES_SEPARACOES.COD_REGSEP'))
+class WmsEstoqueCd(db.Model):
+    __bind_key__  = 'wms'
+    __tablename__ = 'WMS_ESTOQUES_CD'
+    id_estoque = db.Column('ESTCD_ID', db.Integer, primary_key=True)
+    id_empresa = db.Column('EMPR_CODEMP', db.Integer)
+    id_produto = db.Column('ITEM_COD_ITEM_LOG', db.String(20))
+    qtdade     = db.Column('QTD', db.Numeric(17, 4))
 
-    regiao = db.relationship('WmsRegiaoSeparacao', backref=db.backref('predio'))
+class WmsPredio(db.Model):
+    __bind_key__  = 'wms'
+    __tablename__ = 'WMS_PREDIOS'
+    id_predio  = db.Column('PREDIO_ID', db.Integer, primary_key=True)
+    cod_predio = db.Column('COD_PREDIO', db.String(4))
+    id_rua     = db.Column('RUASARM_COD_RUASARM', db.String(5))
+    id_regiao  = db.Column('REGIAO_SEPARACAO', db.ForeignKey('WMS_REGIOES_SEPARACOES.COD_REGSEP'))
+
+    regiao     = db.relationship('WmsRegiaoSeparacao', backref=db.backref('predio'))
 
 class WmsSeparadoresTarefas(db.Model):
-    __bind_key__ = 'wms'
+    __bind_key__  = 'wms'
     __tablename__ = 'STOKY_COLABORADOR_POR_TAREFA'
     id = db.Column('COD_TAREFA_CD', db.Integer, primary_key=True)
     idOnda = db.Column('ONDA_ONDA_ID', db.Integer)

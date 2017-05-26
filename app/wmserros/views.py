@@ -25,7 +25,7 @@ from .. import app
 from ..models import Tarefas, Erros, RegistroDeErros, WmsOnda, WmsColaborador
 from ..models import WmsItems, WmsSeparadoresTarefas, PontuacaoMetaLogistica
 from ..models import MetaTarefa, ParametrosMetas, WmsTarefasCd, WmsPredio, WmsRegiaoSeparacao
-from ..models import ViewSaldoProduto
+from ..models import ViewSaldoProduto, ViewProduto, WmsEstoqueCd, EstoqueSaldo
 
 # Formularios
 from .forms import TarefasForm, ErrosForm, BuscarMetasForm
@@ -591,14 +591,31 @@ def json_error_response(error_code=500):
 # RELATORIOS
 @wmserros.route("/export", methods=['GET'])
 def export():
-    query_sets = ViewSaldoProduto.query.all()
+    query = db.session.query(EstoqueSaldo.id_subproduto, ViewProduto.descricao,\
+                             ViewProduto.fabricante, EstoqueSaldo.qtd_atual)
+    query = query.join(ViewProduto, (db.and_(EstoqueSaldo.id_produto == ViewProduto.id_produto,
+                                          EstoqueSaldo.id_subproduto == ViewProduto.id_subproduto)))
+    query = query.filter(ViewProduto.flag_inativo == 'F')
+
+    #query_sets = ViewProduto.query.filter_by(flag_inativo = 'F').order_by(ViewProduto.descricao)[:5]
     result = []
-    column_names = ['id', 'qtdade']
+    column_names = ['COD', 'DESCRICAO', 'MARCA', 'QTDADE_CISS', 'QTDADE_WMS']
     result.append(column_names)
 
-    for q in query_sets:
-        value = [q.id_subproduto, q.qtd_atual]
-        result.append(value)
+    for q in query:
+        qtd_wms = db.session.query(db.func.sum(WmsEstoqueCd.qtdade).label('qtd'))
+        qtd_wms = qtd_wms.filter(WmsEstoqueCd.id_produto == str(q.id_subproduto)).first()
+        qtd_wms = qtd_wms.qtd if qtd_wms.qtd else 0
+
+        if qtd_wms != q.qtd_atual:
+            produto = []
+            produto.append(q.id_subproduto)
+            produto.append(q.descricao)
+            produto.append(q.fabricante)
+            produto.append(q.qtd_atual)
+            produto.append(qtd_wms)
+
+            result.append(produto)
 
     return excel.make_response_from_array(result, "xlsx", file_name='rel.xlsx')
 
