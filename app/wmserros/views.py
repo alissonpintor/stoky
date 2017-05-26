@@ -596,6 +596,7 @@ def export():
     query = query.join(ViewProduto, (db.and_(EstoqueSaldo.id_produto == ViewProduto.id_produto,
                                           EstoqueSaldo.id_subproduto == ViewProduto.id_subproduto)))
     query = query.filter(ViewProduto.flag_inativo == 'F')
+    query = query.filter(EstoqueSaldo.id_estoque == 1)
 
     #query_sets = ViewProduto.query.filter_by(flag_inativo = 'F').order_by(ViewProduto.descricao)[:5]
     result = []
