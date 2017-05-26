@@ -619,8 +619,3 @@ def export():
             result.append(produto)
 
     return excel.make_response_from_array(result, "xlsx", file_name='rel.xlsx')
-
-
-@wmserros.route("/export_array", methods=['GET'])
-def export_array():
-    return excel.make_response_from_array([[1,2], [3, 4]], "xlsx", file_name='rel.xlsx')
