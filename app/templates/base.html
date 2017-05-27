@@ -18,6 +18,9 @@
 </head>
 
 <body>
+    <div id="preloader">
+      <div id="status">&nbsp;</div>
+    </div>
     <div id="load"></div>
 
     {% include 'navbar.html' %}
@@ -50,8 +53,26 @@
     <script src="{{ url_for('static', filename='js/script.js') }}" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript">// <![CDATA[
         function loading(){
+          var pass_required = true;
+          $('input,textarea,select').filter('[required]:visible').each(function(){
+            if(!$(this).val()){
+              pass_required = false;
+            }
+          });
+
+          if(pass_required){
             $("#load").show();
+          }
+
         }
+
+        // makes sure the whole site is loaded
+        $(window).on('load', function() {
+          // will first fade out the loading animation
+        	$("#status").fadeOut();
+          // will fade out the whole DIV that covers the website.
+        	$("#preloader").delay(1000).fadeOut("slow");
+        })
 // ]]></script>
     {% block scripts %}
     {% endblock %}

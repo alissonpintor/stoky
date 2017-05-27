@@ -55,7 +55,7 @@
           $( "#data_final" ).datepicker( "setDate", "{{ form.data_final.data }}" );
         {% endif %}
 
-        $('.money').mask('000000000.00', {
+        $('.money').mask('##0.00', {
             reverse: true
         });
         $('.integer').mask('000000000');
