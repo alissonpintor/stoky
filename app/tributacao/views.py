@@ -21,7 +21,7 @@ def ajusta_tributacao():
     form = AutroizacaoForm()
     if request.form.get('table_form'):
         if 'id_autorizacao' in session:
-            autorizacao = ConfereMercadoria.query.filter(ConfereMercadoria.id_autorizacao == session['id_autorizacao']).first()
+            autorizacao = ConfereMercadoria.query.filter(ConfereMercadoria.id_autorizacao == session['id_autorizacao'])
 
             if autorizacao:
                 uf_fornecedor = autorizacao[0].autorizacao.fornecedor.uf_cli_for
@@ -89,7 +89,7 @@ def ajusta_tributacao():
     else:
         if form.validate_on_submit():
             session['id_autorizacao'] = form.numero.data
-            autorizacao = ConfereMercadoria.query.filter(ConfereMercadoria.id_autorizacao == form.numero.data).first()
+            autorizacao = ConfereMercadoria.query.filter(ConfereMercadoria.id_autorizacao == form.numero.data)
             if autorizacao:
                 produtos = autorizacao
                 nota = autorizacao[0].autorizacao
