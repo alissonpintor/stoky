@@ -5,7 +5,7 @@ from flask_weasyprint import HTML, render_pdf
 from flask_login import login_required, current_user
 
 from . import metas
-from ..models import Vendedor, GruposDeVendedores, StokyMetasView, Marcas, MetaVendas, AssMetasVendedor
+from ..models import Vendedor, GruposDeVendedores, StokyMetasView, Marcas, MetaVendas, AssMetasVendedor, ClienteFornecedor
 
 from sqlalchemy.orm import exc
 from sqlalchemy import exc as core_exc
@@ -88,6 +88,7 @@ def vendedores(id=None):
         if form.id_vendedor.data != 0:
             vendedor = Vendedor.query.filter(Vendedor.id_vendedor == form.id_vendedor.data).one()
 
+        #query_ciss = ClienteFornecedor.query.filter_by(id_cli_for=form.id_vendedor_ciss.data).first()
         vendedor.id_vendedor_ciss = form.id_vendedor_ciss.data
         vendedor.nome_vendedor = form.nome_vendedor.data
         vendedor.flag_inativo = form.flag_inativo.data
@@ -175,6 +176,7 @@ def metas_vendas(id=None):
                 association = AssMetasVendedor.query.filter(AssMetasVendedor.id_meta_id == form.id_meta.data)
                 for a in association:
                     meta_venda.vendedores.remove(a)
+                    db.session.commit()
             except exc.NoResultFound:
                 message = {'type': 'warning', 'content': 'O registro não foi encontrado'}
                 flash(message)
@@ -286,18 +288,21 @@ def resultados():
 
             # Define os filtros da consulta
             query_ciss = query_ciss.filter(StokyMetasView.dt_movimento.between(meta.dt_inicial, meta.dt_final))\
-                                   .filter(StokyMetasView.id_vendedor == v.vendedor.id_vendedor_ciss).one()
-            vendedor = {}
-            vendedor['id_ciss'] = v.vendedor.id_vendedor_ciss
-            vendedor['nome_vendedor'] = v.vendedor.nome_vendedor
-            vendedor['val_bruto'] = query_ciss.val_bruto if query_ciss.val_bruto else 0
-            vendedor['val_dev'] = query_ciss.val_dev if query_ciss.val_dev else 0
-            vendedor['val_vendido'] = query_ciss.val_liquido
-            vendedor['val_meta_minimo'] = v.val_meta_min_vendedor
-            vendedor['val_meta'] = v.val_meta_vendedor
-            vendedor['perc_atingido'] = (query_ciss.val_liquido * 100)/v.val_meta_vendedor
-            total_grupo['valor'] += query_ciss.val_liquido
-            vendedores.append(vendedor)
+                                   .filter(StokyMetasView.id_vendedor == v.vendedor.id_vendedor_ciss).first()
+            print(v.vendedor.id_vendedor_ciss)
+            print(query_ciss)
+            if query_ciss:
+                vendedor = {}
+                vendedor['id_ciss'] = v.vendedor.id_vendedor_ciss
+                vendedor['nome_vendedor'] = v.vendedor.nome_vendedor
+                vendedor['val_bruto'] = query_ciss.val_bruto if query_ciss.val_bruto else 0
+                vendedor['val_dev'] = query_ciss.val_dev if query_ciss.val_dev else 0
+                vendedor['val_vendido'] = query_ciss.val_liquido if query_ciss.val_liquido else 0
+                vendedor['val_meta_minimo'] = v.val_meta_min_vendedor
+                vendedor['val_meta'] = v.val_meta_vendedor
+                vendedor['perc_atingido'] = (query_ciss.val_liquido * 100)/v.val_meta_vendedor if query_ciss.val_liquido else 0
+                total_grupo['valor'] += query_ciss.val_liquido if query_ciss.val_liquido else 0
+                vendedores.append(vendedor)
         total_grupo['perc'] = (total_grupo['valor'] * 100)/meta.valor_meta
 
         # Define as colunas que vao ser retornadas na consulta em StokyMetasView

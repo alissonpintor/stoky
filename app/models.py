@@ -72,6 +72,7 @@ class ClienteFornecedor(db.Model):
     id_cli_for = db.Column('IDCLIFOR', db.Integer, primary_key=True)
     nome = db.Column('NOME', db.String(80), nullable=False)
     uf_cli_for = db.Column('UFCLIFOR', db.String(2))
+    tipo_cadastro = db.Column('COLUMN_NAME', db.String(1))
 
 class ConfereAutoriza(db.Model):
     __bind_key__ = 'ciss'
