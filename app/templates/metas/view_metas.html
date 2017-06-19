@@ -32,6 +32,40 @@
 
 {% block scripts %}
 <script>
+
+  var data = {{ vendedores_metas|tojson }}
+
+  function expandTable(index, row) {
+
+        columns = [
+          {field: 'cod_ciss', title: 'Cod. Ciss'},
+          {field: 'nome', title: 'Nome', sortable: true},
+          {field: 'meta_min', title: 'Meta Min.'},
+          {field: 'meta', title: 'Meta'}
+        ]
+
+        var result = (data[row[1]]);
+        var data_user = []
+
+        $.each(result, function(k, v){
+            data_user.push({
+              'cod_ciss': v['cod_ciss'],
+              'nome': v['nome'],
+              'meta_min': v['meta_min'],
+              'meta': v['meta']
+            })
+        });
+
+        var el = $(document.createElement('table'))
+        $(el).bootstrapTable({
+            dataClasses: 'table table-no-bordered',
+            columns: columns,
+            data: data_user,
+            sortName: 'nome'
+        });
+        return el;
+  }
+
     $(function() {
         $('#data_inicial').mask('00-00-0000');
         $('#data_final').mask('00-00-0000');

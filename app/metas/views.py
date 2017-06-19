@@ -29,7 +29,6 @@ def parseStrToFloat(value):
 
 def format_date(userdate):
     date = dateparser.parse(userdate, date_formats=['%Y-%m-%d'])
-    print(date)
     try:
         return datetime.strftime(date)
     except TypeError:
@@ -163,7 +162,18 @@ def grupos(id=None):
 @vendas_permission.require(http_exception=401)
 def metas_vendas(id=None):
     metas = MetaVendas.query.order_by(MetaVendas.dt_inicial)
+    vendedores_metas = {}
     vendedores = Vendedor.query.filter(Vendedor.flag_inativo == False)
+
+    for m in metas:
+        vendedores_metas[m.id_meta] = []
+        for v in m.vendedores:
+            data = {}
+            data['cod_ciss'] = v.vendedor.id_vendedor_ciss
+            data['nome'] = v.vendedor.nome_vendedor
+            data['meta_min'] = str(v.val_meta_min_vendedor)
+            data['meta'] = str(v.val_meta_vendedor)
+            vendedores_metas[m.id_meta].append(data)
 
     form = MetaVendaForm()
     if form.validate_on_submit():
@@ -259,7 +269,7 @@ def metas_vendas(id=None):
 
     classe = 'meta'
 
-    return render_template('metas/view_metas.html', title='Cadastro de Metas', form=form,  metas=metas, classe=classe)
+    return render_template('metas/view_metas.html', title='Cadastro de Metas', form=form,  metas=metas, vendedores_metas=vendedores_metas, classe=classe)
 
 @metas.route('/resultados', methods=['GET', 'POST'])
 @login_required
@@ -289,7 +299,7 @@ def resultados():
             # Define os filtros da consulta
             query_ciss = query_ciss.filter(StokyMetasView.dt_movimento.between(meta.dt_inicial, meta.dt_final))\
                                    .filter(StokyMetasView.id_vendedor == v.vendedor.id_vendedor_ciss).first()
-                                   
+
             if query_ciss:
                 vendedor = {}
                 vendedor['id_ciss'] = v.vendedor.id_vendedor_ciss
