@@ -3,5 +3,34 @@
   {% include "metas/forms/form_resultados.html" %}
   {% include "metas/tables/table_resultados.html" %}
 {% endblock %}
+
 {% block scripts %}
+<script>
+  function percentSorter(a, b){
+    a = parseFloat(a.replace('%', '')); // remove $
+    b = parseFloat(b.replace('%', ''));
+    if (a > b) return 1;
+    if (a < b) return -1;
+    return 0;
+  }
+
+  function valueSorter(a, b){
+    
+    a = a.replace('-', '');
+    b = b.replace('-', '');
+
+    a = a.replace('R$', '');
+    b = b.replace('R$', '');
+
+    a = a.replace(',', '');
+    b = b.replace(',', '');
+
+    a = parseFloat(a);
+    b = parseFloat(b);
+
+    if (a > b) return 1;
+    if (a < b) return -1;
+    return 0;
+  }
+</script>
 {% endblock %}

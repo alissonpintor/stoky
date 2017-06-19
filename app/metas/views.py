@@ -289,8 +289,7 @@ def resultados():
             # Define os filtros da consulta
             query_ciss = query_ciss.filter(StokyMetasView.dt_movimento.between(meta.dt_inicial, meta.dt_final))\
                                    .filter(StokyMetasView.id_vendedor == v.vendedor.id_vendedor_ciss).first()
-            print(v.vendedor.id_vendedor_ciss)
-            print(query_ciss)
+                                   
             if query_ciss:
                 vendedor = {}
                 vendedor['id_ciss'] = v.vendedor.id_vendedor_ciss
