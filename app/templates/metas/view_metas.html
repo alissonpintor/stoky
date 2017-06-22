@@ -34,6 +34,8 @@
 <script>
 
   var data = {{ vendedores_metas|tojson }}
+  var soma_meta = 0;
+  var soma_meta_minima = 0;
 
   function expandTable(index, row) {
 
@@ -99,6 +101,16 @@
             $('.flag').each(function(){
               $(this).prop('checked', checked_status);
             })
+        });
+
+        $('.meta').on('change', function(){
+          window.soma_meta += parseFloat(this.value);
+          $('#valor_meta_soma').val(window.soma_meta);
+        });
+
+        $('.meta_minima').on('change', function(){
+          window.soma_meta_minima += parseFloat(this.value);
+          $('#valor_meta_minimo_soma').val(window.soma_meta_minima);
         });
     });
 </script>

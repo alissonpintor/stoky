@@ -37,7 +37,6 @@ TABLES = {'tarefas': {'classe': Tarefas, 'url_padrao': 'wmserros.tarefas'},
 
 def format_date(userdate):
     date = dateparser.parse(userdate, date_formats=['%Y-%m-%d'])
-    print(date)
     try:
         return datetime.strftime(date)
     except TypeError:
@@ -451,9 +450,7 @@ def exibir_erros():
 
     if request.args.get('total_remove'):
         total = int(request.args.get('total_remove')) + 1
-        print(total)
         for t in range(1, total):
-            print(t)
             id_registro = request.args.get('id_%i' % t)
             registro = RegistroDeErros.query.filter(RegistroDeErros.id_registro == id_registro).first()
 
@@ -520,7 +517,6 @@ def json_buscar_tarefa(id_tarefa):
     Função usada para buscar a tarefa pelo numero da Tarefa no WMS
     """
     tarefa = WmsSeparadoresTarefas.query.filter(WmsSeparadoresTarefas.id == id_tarefa).first()
-    print('teste')
     if tarefa:
         return json_response(obj='TAREFA')
     else:
@@ -549,7 +545,6 @@ def json_buscar_colaborador(id_produto, id_onda=None , id_tarefa=None):
             objs.append(obj)
         return json_response(obj=objs)
     elif colaborador.count() == 1:
-        print('teste')
         c = colaborador[0]
         obj = [{'id': c.idColaborador, 'nome': c.nomeColaborador}]
         return json_response(obj=obj)
@@ -573,7 +568,6 @@ def json_buscar_erros_tarefa(id_tarefa):
         for e in erros:
             j_erro = {'id': e.id_erro, 'descricao': e.descricao}
             j_erros.append(j_erro)
-        print(j_erros)
         return json_response(obj=j_erros)
     else:
         return json_error_response()

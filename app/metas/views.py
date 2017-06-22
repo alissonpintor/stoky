@@ -163,7 +163,7 @@ def grupos(id=None):
 def metas_vendas(id=None):
     metas = MetaVendas.query.order_by(MetaVendas.dt_inicial)
     vendedores_metas = {}
-    vendedores = Vendedor.query.filter(Vendedor.flag_inativo == False)
+    vendedores = Vendedor.query.filter(Vendedor.flag_inativo == False).order_by(Vendedor.nome_vendedor)
 
     for m in metas:
         vendedores_metas[m.id_meta] = []
@@ -208,8 +208,8 @@ def metas_vendas(id=None):
                 if vform.valor_meta_minimo.data != '':
                     a.val_meta_min_vendedor = Decimal(vform.valor_meta_minimo.data)
                 v = Vendedor.query.filter(Vendedor.id_vendedor == vform.id_vendedor.data).one()
-                a.vendedor = v
                 meta_venda.vendedores.append(a)
+                a.vendedor = v
 
         try:
             db.session.add(meta_venda)

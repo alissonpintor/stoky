@@ -108,8 +108,6 @@ class MetaVendaForm(FlaskForm):
     def validate_data_final(form, field):
         dt_inicial = format_date(form.data_inicial.data)
         dt_final = format_date(field.data)
-        print(dt_inicial)
-        print(dt_final)
         if dt_final is None:
             raise ValidationError('Com o flag Buscar por data marcado a Data Final e obrigatorio')
         if dt_inicial and dt_final < dt_inicial:
