@@ -83,7 +83,7 @@
                     {% set glyphicon='glyphicon-triangle-bottom' %}
                     <tr style="color:red">
                   {% endif %}
-                  <td colspan="7" style="text-align:right;"><strong>Valor Realizado Grupo</strong></td>
+                  <td colspan="8" style="text-align:right;"><strong>Valor Realizado Grupo</strong></td>
                   <td>
                     <span class="glyphicon {{ glyphicon }}" aria-hidden="true"></span>
                     <strong>{{ "R$ {:,.2f}".format(total_grupo.valor) }}</strong>
@@ -93,7 +93,7 @@
                   </td>
                 </td>
                 {% else %}
-                  <td colspan="7" style="text-align:right;"><strong>Valor Realizado Grupo</strong></td>
+                  <td colspan="8" style="text-align:right;"><strong>Valor Realizado Grupo</strong></td>
                   <td><strong>0.0</strong></td>
                   <td></td>
                 {% endif %}
@@ -110,7 +110,7 @@
                     {% set glyphicon='glyphicon-triangle-bottom' %}
                     <tr style="color:red">
                   {% endif %}
-                <td colspan="7" style="text-align:right;"><strong>Valor Realizado Total</strong></td>
+                <td colspan="8" style="text-align:right;"><strong>Valor Realizado Total</strong></td>
                   <td>
                     <span class="glyphicon {{ glyphicon }}" aria-hidden="true"></span>
                     <strong>{{ "R$ {:,.2f}".format(total_vendas.valor) }}</strong>
@@ -119,7 +119,7 @@
                     <strong>{{ "% {:,.2f}".format(total_vendas.perc) }}</strong>
                   </td>
                 {% else %}
-                  <td colspan="7" style="text-align:right;"><strong>Valor Realizado Total</strong></td>
+                  <td colspan="8" style="text-align:right;"><strong>Valor Realizado Total</strong></td>
                   <td><strong>0.0</strong></td>
                   <td></td>
                 {% endif %}
