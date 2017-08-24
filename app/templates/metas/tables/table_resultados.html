@@ -13,7 +13,9 @@
     <div role="tabpanel" class="tab-pane">
         <table id="mytable"
                data-toggle="table"
-               data-classes="table table-no-bordered">
+               data-classes="table table-no-bordered"
+               data-detail-view="true"
+               data-detail-formatter="expandTable">
             <thead>
                 <tr>
                     <th></th>
@@ -30,7 +32,7 @@
 
             <tfoot>
               <tr>
-                <td colspan="7" style="text-align:right;"><strong>Meta Minima</strong></td>
+                <td colspan="8" style="text-align:right;"><strong>Meta Minima</strong></td>
                 {% if meta.valor_meta_minimo %}
                   <td><strong>{{ "R$ {:,.2f}".format(meta.valor_meta_minimo) }}</strong></td>
                 {% else %}
@@ -40,7 +42,7 @@
               </tr>
 
               <tr>
-                <td colspan="7" style="text-align:right;"><strong>Meta</strong></td>
+                <td colspan="8" style="text-align:right;"><strong>Meta</strong></td>
                 {% if meta.valor_meta %}
                   <td><strong>{{ "R$ {:,.2f}".format(meta.valor_meta) }}</strong></td>
                 {% else %}
@@ -50,7 +52,7 @@
               </tr>
 
               <tr>
-                <td colspan="7" style="text-align:right;"><strong>Realizado Bruto</strong></td>
+                <td colspan="8" style="text-align:right;"><strong>Realizado Bruto</strong></td>
                 {% if total_vendas.val_bruto %}
                   <td><strong>{{ "R$ {:,.2f}".format(total_vendas.val_bruto) }}</strong></td>
                 {% else %}
@@ -60,7 +62,7 @@
               </tr>
 
               <tr class="text-danger">
-                <td colspan="7" style="text-align:right;"><strong>Devoluções</strong></td>
+                <td colspan="8" style="text-align:right;"><strong>Devoluções</strong></td>
                 {% if total_vendas.val_dev %}
                   <td><strong>{{ "R$ {:,.2f}".format(total_vendas.val_dev) }}</strong></td>
                 {% else %}

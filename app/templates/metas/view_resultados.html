@@ -6,6 +6,75 @@
 
 {% block scripts %}
 <script>
+  var data = {{ vendasSemanais|tojson }}
+
+  function expandTable(index, row) {
+
+        columns = [
+          {field: 'status', formatter: 'nameFormatter'},
+          {field: 'week', title: 'Dias da semana'},
+          {field: 'val_bruto', title: 'Valor Bruto'},
+          {field: 'val_dev', title: 'Valor Dev.'},
+          {field: 'val_liquido', title: 'Valor Realizado'},
+          {field: 'meta_semana', title: 'Meta da Semana'},
+          {field: 'perc_atingido', title: '% Atingido'}
+        ]
+
+        var result = (data[row[1]]);
+        var data_user = []
+
+        $.each(result, function(k, v){
+            data_user.push({
+              'week': v['week'],
+              'val_bruto': v['val_bruto'],
+              'val_dev': v['val_dev'],
+              'val_liquido': v['val_liquido'],
+              'meta_semana': v['meta_semana'],
+              'perc_atingido': v['perc_atingido']
+            })
+        });
+
+        var el = $(document.createElement('table'))
+        $(el).bootstrapTable({
+            dataClasses: 'table table-no-bordered',
+            columns: columns,
+            data: data_user,
+            rowStyle: rowStyle
+        });
+        return el;
+  }
+
+  function rowStyle(row, index) {
+    var metaSemana = parseFloat(row['meta_semana'].replace('R$', ''));
+    var vendaDaSemana = parseFloat(row['val_liquido'].replace('R$', ''));
+
+    console.log($(row['status']).html('<p>teste</p>'))
+
+    if(vendaDaSemana < metaSemana){
+      return {
+        classes: 'danger text-danger'
+      };
+    }else{
+      return {
+        classes: 'text-success'
+      };
+    }
+
+  }
+
+  function nameFormatter(value, row) {
+      var metaSemana = parseFloat(row['meta_semana'].replace('R$', ''));
+      var vendaDaSemana = parseFloat(row['val_liquido'].replace('R$', ''));
+
+      if(vendaDaSemana < metaSemana){
+        var icon = 'glyphicon-triangle-bottom'
+        return '<i class="glyphicon ' + icon + '"></i> ';
+      }else{
+        var icon = 'glyphicon-triangle-top'
+        return '<i class="glyphicon ' + icon + '"></i> ';
+      }
+  }
+
   function percentSorter(a, b){
     a = parseFloat(a.replace('%', '')); // remove $
     b = parseFloat(b.replace('%', ''));
@@ -15,7 +84,7 @@
   }
 
   function valueSorter(a, b){
-    
+
     a = a.replace('-', '');
     b = b.replace('-', '');
 

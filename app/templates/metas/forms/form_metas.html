@@ -1,7 +1,7 @@
 {% import "bootstrap/utils.html" as utils %}
 {% import "bootstrap/wtf.html" as wtf %}
 <br />
-<form action="{{ url_for('metas.metas_vendas') }}" method="post" class="form-group">
+<form action="{{ url_for('vendas.metas_vendas') }}" method="post" class="form-group">
   {{ form.hidden_tag() }}
   {{ wtf.form_errors(form) }}
   <div class="row">

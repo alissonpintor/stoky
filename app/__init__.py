@@ -46,8 +46,8 @@ app.register_blueprint(configuracoes_blueprint, url_prefix='/configuracoes')
 from .tributacao import tributacao as tributacao_blueprint
 app.register_blueprint(tributacao_blueprint, url_prefix='/tributacao')
 
-from .metas import metas as metas_blueprint
-app.register_blueprint(metas_blueprint, url_prefix='/metas')
+from .vendas import vendas as vendas_blueprint
+app.register_blueprint(vendas_blueprint, url_prefix='/vendas')
 
 from .auth import auth as auth_blueprint
 app.register_blueprint(auth_blueprint, url_prefix='/auth')

@@ -1,5 +1,5 @@
 <div class="col-md-12">
-  <form action="{{ url_for('metas.vendedores') }}" method="get" class="form-horizontal hidden-print">
+  <form action="{{ url_for('vendas.vendedores') }}" method="get" class="form-horizontal hidden-print">
 
     <div class="form-group">
         <label for="metas" class="col-sm-1 control-label">Metas</label>
@@ -38,10 +38,10 @@
                 <tr class="danger" style="color:red">
                 {% endif %}
                     <td>
-                        <a class="btn btn-default" href="{{ url_for('metas.vendedores', id=v.id_vendedor) }}">
+                        <a class="btn btn-default" href="{{ url_for('vendas.vendedores', id=v.id_vendedor) }}">
                             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                         </a>
-                        <a class="btn btn-default detele" href="{{ url_for('metas.deletar', path=classe, id=v.id_vendedor) }}">
+                        <a class="btn btn-default detele" href="{{ url_for('vendas.deletar', path=classe, id=v.id_vendedor) }}">
                             <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
                         </a>
                     </td>

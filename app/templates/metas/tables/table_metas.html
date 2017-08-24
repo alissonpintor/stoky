@@ -21,10 +21,10 @@
               {% for me in metas %}
                 <tr>
                     <td>
-                        <a class="btn btn-default" href="{{ url_for('metas.metas_vendas', id=me.id_meta) }}">
+                        <a class="btn btn-default" href="{{ url_for('vendas.metas_vendas', id=me.id_meta) }}">
                             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                         </a>
-                        <a class="btn btn-default" href="{{ url_for('metas.deletar', path=classe, id=me.id_meta) }}">
+                        <a class="btn btn-default" href="{{ url_for('vendas.deletar', path=classe, id=me.id_meta) }}">
                             <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
                         </a>
                     </td>
@@ -34,7 +34,7 @@
                     <td>{{ me.dt_final.strftime('%d-%m-%Y') }}</td>
                     <td>{{ me.valor_meta_minimo }}</td>
                     <td>{{ me.valor_meta }}</td>
-                </tr>            
+                </tr>
 
               {% endfor %}
               {% else %}

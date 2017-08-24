@@ -4,7 +4,7 @@ from flask import request, redirect, url_for, flash
 from flask_weasyprint import HTML, render_pdf
 from flask_login import login_required, current_user
 
-from . import metas
+from . import vendas
 from ..models import Vendedor, GruposDeVendedores, StokyMetasView, Marcas, MetaVendas, AssMetasVendedor, ClienteFornecedor
 
 from sqlalchemy.orm import exc
@@ -17,9 +17,9 @@ import datetime
 import dateparser
 from decimal import Decimal
 
-TABLES = {'vendedor': {'classe': Vendedor, 'url_padrao': 'metas.vendedores'},
-          'grupo': {'classe': GruposDeVendedores, 'url_padrao': 'metas.grupos'},
-          'meta': {'classe': MetaVendas, 'url_padrao': 'metas.metas_vendas'}}
+TABLES = {'vendedor': {'classe': Vendedor, 'url_padrao': 'vendas.vendedores'},
+          'grupo': {'classe': GruposDeVendedores, 'url_padrao': 'vendas.grupos'},
+          'meta': {'classe': MetaVendas, 'url_padrao': 'vendas.metas_vendas'}}
 
 # FUNCOES AUXILIARES
 def parseStrToFloat(value):
@@ -35,7 +35,7 @@ def format_date(userdate):
         return None
 
 # ROTA USADA PARA DELETAR OS REGISTROS
-@metas.route('/deletar/<path>/<id>')
+@vendas.route('/deletar/<path>/<id>')
 @login_required
 @vendas_permission.require(http_exception=401)
 def deletar(path, id):
@@ -63,8 +63,8 @@ def deletar(path, id):
         flash(message)
         return redirect(url_for(TABLES[path]['url_padrao']))
 
-@metas.route('/vendedores', methods=['POST', 'GET'])
-@metas.route('/vendedores/<id>')
+@vendas.route('/vendedores', methods=['POST', 'GET'])
+@vendas.route('/vendedores/<id>')
 @login_required
 @vendas_permission.require(http_exception=401)
 def vendedores(id=None):
@@ -98,7 +98,7 @@ def vendedores(id=None):
         message = {'type': 'success', 'content': 'Registro cadastrado com sucesso.'}
         flash(message)
 
-        return redirect(url_for('metas.vendedores'))
+        return redirect(url_for('vendas.vendedores'))
 
     # Verifica se foi passado o id pela url para buscar o registro para ser alterado
     if id:
@@ -110,8 +110,8 @@ def vendedores(id=None):
 
     return render_template('metas/view_vendedores.html', title='Cadastro de Vendedores', vendedores=vendedores, classe=classe, form=form, active_table=active_table)
 
-@metas.route('/grupos', methods=['GET', 'POST'])
-@metas.route('/grupos/<id>')
+@vendas.route('/grupos', methods=['GET', 'POST'])
+@vendas.route('/grupos/<id>')
 @login_required
 @vendas_permission.require(http_exception=401)
 def grupos(id=None):
@@ -146,7 +146,7 @@ def grupos(id=None):
         message = {'type': 'success', 'content': 'Registro cadastrado com sucesso'}
         flash(message)
 
-        redirect(url_for('metas.grupos'))
+        redirect(url_for('vendas.grupos'))
 
     if id:
         grupo = GruposDeVendedores.query.filter(GruposDeVendedores.id_grupo == id).one()
@@ -156,8 +156,8 @@ def grupos(id=None):
 
     return render_template('metas/view_grupos.html', title='Cadastro de Grupos', grupos=grupos, form=form, classe=classe)
 
-@metas.route('/metas_vendas', methods=['POST', 'GET'])
-@metas.route('/metas_vendas/<id>')
+@vendas.route('/metas_vendas', methods=['POST', 'GET'])
+@vendas.route('/metas_vendas/<id>')
 @login_required
 @vendas_permission.require(http_exception=401)
 def metas_vendas(id=None):
@@ -190,7 +190,7 @@ def metas_vendas(id=None):
             except exc.NoResultFound:
                 message = {'type': 'warning', 'content': 'O registro não foi encontrado'}
                 flash(message)
-                redirect(url_for('metas.metas_vendas'))
+                redirect(url_for('vendas.metas_vendas'))
 
         meta_venda.nome_meta = form.nome_meta.data
         meta_venda.dt_inicial = dateparser.parse(form.data_inicial.data, date_formats=['%d-%m-%Y'])
@@ -216,12 +216,12 @@ def metas_vendas(id=None):
             db.session.commit()
             message = {'type': 'success', 'content': 'Registro cadastrado com sucesso'}
             flash(message)
-            return redirect(url_for('metas.metas_vendas'))
+            return redirect(url_for('vendas.metas_vendas'))
 
         except Exception as e:
             message = {'type': 'error', 'content': 'Erro ao cadastrar registo'}
             flash(message)
-            return redirect(url_for('metas.metas_vendas'))
+            return redirect(url_for('vendas.metas_vendas'))
 
     if id:
         try:
@@ -254,7 +254,7 @@ def metas_vendas(id=None):
         except exc.NoResultFound:
             message = {'type': 'warning', 'content': 'O registro não foi encontrado'}
             flash(message)
-            redirect(url_for('metas.metas_vendas'))
+            redirect(url_for('vendas.metas_vendas'))
 
 
     elif len(form.vendedores) == 0:
@@ -271,12 +271,13 @@ def metas_vendas(id=None):
 
     return render_template('metas/view_metas.html', title='Cadastro de Metas', form=form,  metas=metas, vendedores_metas=vendedores_metas, classe=classe)
 
-@metas.route('/resultados', methods=['GET', 'POST'])
+@vendas.route('/resultados', methods=['GET', 'POST'])
 @login_required
 @vendas_permission.require(http_exception=401)
 def resultados():
 
     vendedores=None
+    vendasSemanais = {}
     meta=None
     total_vendas={'valor': 0, 'perc': 0}
     total_grupo={'valor': 0, 'perc': 0}
@@ -291,28 +292,89 @@ def resultados():
         vendedores = []
 
         for v in meta.vendedores:
-            # Define as colunas que vao ser retornadas na consulta em StokyMetasView
-            query_ciss = db.session.query(db.func.sum(StokyMetasView.val_venda).label('val_bruto'),\
-                                          db.func.sum(StokyMetasView.val_devolucao).label('val_dev'),\
-                                          (db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('val_liquido'))
+            vendedor = {}
+            idVendedor = v.vendedor.id_vendedor_ciss
+            vendasSemanais[idVendedor] = []
+            year, month, initDay = (meta.dt_inicial.year, meta.dt_inicial.month, meta.dt_inicial.day)
 
-            # Define os filtros da consulta
-            query_ciss = query_ciss.filter(StokyMetasView.dt_movimento.between(meta.dt_inicial, meta.dt_final))\
-                                   .filter(StokyMetasView.id_vendedor == v.vendedor.id_vendedor_ciss).first()
+            if(year == datetime.date.today().year and month == datetime.date.today().month):
+                finalDay = datetime.date.today().day if datetime.date.today().day < meta.dt_final.day else meta.dt_final.day
+            else:
+                finalDay = meta.dt_final.day
 
-            if query_ciss:
-                vendedor = {}
-                vendedor['id_ciss'] = v.vendedor.id_vendedor_ciss
-                vendedor['nome_vendedor'] = v.vendedor.nome_vendedor
-                vendedor['val_bruto'] = query_ciss.val_bruto if query_ciss.val_bruto else 0
-                vendedor['val_dev'] = query_ciss.val_dev if query_ciss.val_dev else 0
-                vendedor['val_vendido'] = query_ciss.val_liquido if query_ciss.val_liquido else 0
-                vendedor['val_meta_minimo'] = v.val_meta_min_vendedor
-                vendedor['val_meta'] = v.val_meta_vendedor
-                vendedor['perc_atingido'] = (query_ciss.val_liquido * 100)/v.val_meta_vendedor if query_ciss.val_liquido else 0
-                total_grupo['valor'] += query_ciss.val_liquido if query_ciss.val_liquido else 0
-                vendedores.append(vendedor)
+            # print(year, month, initDay, finalDay)
+            initWeekDay = datetime.date(year, month, initDay)
+            finalWeekDay = None
+            weekCount = None
+            week = 1
+
+            count = 0
+            for day in range(initDay, meta.dt_final.day+1):
+                data = datetime.date(year, month, day)
+                if(data.weekday() == 6):
+                    count = count + 1
+            metaDiaria = v.val_meta_vendedor / (meta.dt_final.day - count)
+
+            salesman = {}
+            salesman['id_ciss'] = v.vendedor.id_vendedor_ciss
+            salesman['nome_vendedor'] = v.vendedor.nome_vendedor
+            salesman['val_bruto'] = 0
+            salesman['val_dev'] = 0
+            salesman['val_vendido'] = 0
+            salesman['val_meta_minimo'] = v.val_meta_min_vendedor
+            salesman['val_meta'] = v.val_meta_vendedor
+            salesman['val_semanal'] = []
+            salesman['perc_atingido'] = 0
+            total_grupo['valor'] += 0
+
+            dayCount = 1
+            for day in range(initDay, finalDay+1):
+                data = datetime.date(year, month, day)
+                weekCount = data.weekday()
+
+                if(weekCount == 6):
+                    continue
+
+                if weekCount == 5 or day == finalDay:
+                    finalWeekDay = datetime.date(year, month, day)
+                    # Define as colunas que vao ser retornadas na consulta em StokyMetasView
+                    query_ciss = db.session.query(db.func.sum(StokyMetasView.val_venda).label('val_bruto'),\
+                                                  db.func.sum(StokyMetasView.val_devolucao).label('val_dev'),\
+                                                  (db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('val_liquido'))
+
+                    # Define os filtros da consulta
+                    query_ciss = query_ciss.filter(StokyMetasView.dt_movimento.between(initWeekDay, finalWeekDay))\
+                                           .filter(StokyMetasView.id_vendedor == v.vendedor.id_vendedor_ciss).first()
+
+                    if query_ciss:
+                        weekSale = {}
+                        weekSale['week'] = 'De {0} à {1}'.format(initWeekDay.day, finalWeekDay.day)
+                        weekSale['val_bruto'] = 'R$ {:10.2f}'.format(query_ciss.val_bruto if query_ciss.val_bruto else 0)
+                        weekSale['val_dev'] = 'R$ {:10.2f}'.format(query_ciss.val_dev if query_ciss.val_dev else 0)
+                        weekSale['val_liquido'] = 'R$ {:10.2f}'.format(query_ciss.val_liquido if query_ciss.val_liquido else 0)
+                        weekSale['meta_semana'] = 'R$ {:10.2f}'.format((dayCount * metaDiaria))
+                        weekSale['perc_atingido'] = '%{:10.2f}'.format(((query_ciss.val_liquido * 100)/(dayCount * metaDiaria) if query_ciss.val_liquido else 0))
+                        vendasSemanais[idVendedor].append(weekSale)
+
+                        salesman['val_bruto'] = salesman['val_bruto'] + (query_ciss.val_bruto if query_ciss.val_bruto else 0)
+                        salesman['val_dev'] = salesman['val_dev'] + (query_ciss.val_dev if query_ciss.val_dev else 0)
+                        salesman['val_vendido'] = salesman['val_vendido'] + (query_ciss.val_liquido if query_ciss.val_liquido else 0)
+                        salesman['val_semanal'].append(weekSale)
+
+                    salesman['perc_atingido'] = (salesman['val_vendido'] * 100)/v.val_meta_vendedor if salesman['val_vendido'] else 0
+
+                    if(day < finalDay):
+                        initWeekDay = datetime.date(year, month, day + 2)
+
+                    dayCount = 0
+                dayCount = dayCount + 1
+
+            total_grupo['valor'] += salesman['val_vendido'] if salesman['val_vendido'] else 0
+            vendedores.append(salesman)
+
         total_grupo['perc'] = (total_grupo['valor'] * 100)/meta.valor_meta
+
+        # ------- A BUSCA DE VENDAS DOS VENDEDORES TERMINA AQUI ----------------------------------------------------------
 
         # Define as colunas que vao ser retornadas na consulta em StokyMetasView
         outros = db.session.query(db.func.sum(StokyMetasView.val_venda).label('val_bruto'),\
@@ -334,4 +396,12 @@ def resultados():
         total_vendas['valor'] = query_total_vendas.valor
         total_vendas['perc'] = (query_total_vendas.valor * 100)/meta.valor_meta
 
-    return render_template('metas/view_resultados.html', title='Resultados', vendedores=vendedores, outros=outros, meta=meta, total_grupo=total_grupo, total_vendas=total_vendas, form=form)
+    return render_template('metas/view_resultados.html', title='Resultados', vendedores=vendedores, outros=outros, meta=meta, total_grupo=total_grupo,\
+                            total_vendas=total_vendas, vendasSemanais=vendasSemanais, form=form)
+
+@vendas.route('/comissao', methods=['GET', 'POST'])
+@login_required
+@vendas_permission.require(http_exception=401)
+def comissao():
+    ''' relatorio 51 do Ciss '''
+    pass

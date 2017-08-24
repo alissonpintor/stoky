@@ -19,13 +19,13 @@
 
           {% if current_user.is_admin or current_user.role.name in ['admin', 'vendas'] %}
             <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Metas <span class="caret"></span></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Vendas <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li><a href="{{ url_for('metas.vendedores') }}">Cadastro de vendedores</a></li>
-                    <li><a href="{{ url_for('metas.grupos') }}">Cadastro de grupos</a></li>
-                    <li><a href="{{ url_for('metas.metas_vendas') }}">Cadastro de metas</a></li>
+                    <li><a href="{{ url_for('vendas.vendedores') }}">Cadastro de vendedores</a></li>
+                    <li><a href="{{ url_for('vendas.grupos') }}">Cadastro de grupos</a></li>
+                    <li><a href="{{ url_for('vendas.metas_vendas') }}">Cadastro de metas</a></li>
                     <li role="separator" class="divider"></li>
-                    <li><a href="{{ url_for('metas.resultados') }}">Resultado de metas</a></li>
+                    <li><a href="{{ url_for('vendas.resultados') }}">Resultado de metas</a></li>
                 </ul>
             </li>
           {% endif %}

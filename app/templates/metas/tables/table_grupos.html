@@ -13,10 +13,10 @@
               {% for g in grupos %}
                 <tr>
                     <td>
-                        <a class="btn btn-default" href="/grupos/{{  g.id_grupo }}">
+                        <a class="btn btn-default" href="{{ url_for('vendas.grupos', id=g.id_grupo) }}">
                             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                         </a>
-                        <a class="btn btn-default detele" href="/deletar/{{ classe }}/{{ g.id_grupo }}">
+                        <a class="btn btn-default detele" href="{{ url_for('vendas.deletar', path=classe, id=g.id_grupo) }}">
                             <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
                         </a>
                         <a class="btn btn-default button-hidden" href="#">
