@@ -425,7 +425,7 @@ def informar_erros(busca=None):
             id_onda = int(request.args.get('onda'))
             id_produto = int(request.args.get('id-produto'))
             id_tarefa = int(request.args.get('tipo-tarefa'))
-            return json_buscar_colaborador(id_produto, id_onda=id_onda , id_tarefa=id_tarefa)
+            return json_buscar_colaborador(id_produto, id_onda=id_onda, id_tarefa=id_tarefa)
 
     # Busca os erros de acordo com a tarefa selecionada
     if busca == 'tarefa':
@@ -494,7 +494,7 @@ def exibir_erros():
                 'id_tarefa': r.erro.tarefa.descricao,
                 'id_erro': r.erro.descricao,
                 'descricao_produto': r.descricao_produto.capitalize(),
-                'colaborador': WmsColaborador.query.filter_by(id = r.id_colaborador).one().nome,
+                'colaborador': WmsColaborador.query.filter_by(id = r.id_colaborador).first().nome,
                 'data_cadastro': str(r.data_cadastro),
             })
         return jsonify(r_json)
@@ -506,21 +506,23 @@ def json_buscar_onda(id_onda):
     """
     Função usada para buscar o cliente pelo numero da Onda no WMS
     """
-    onda = WmsOnda.query.filter(WmsOnda.id == id_onda).first()
+    onda = WmsOnda.query.filter_by(id=id_onda).first()
     if onda:
-        return json_response(obj=onda.nomeCliente)
+        return jsonify(onda.nomeCliente)
     else:
         return json_buscar_tarefa(id_onda)
+
 
 def json_buscar_tarefa(id_tarefa):
     """
     Função usada para buscar a tarefa pelo numero da Tarefa no WMS
     """
-    tarefa = WmsSeparadoresTarefas.query.filter(WmsSeparadoresTarefas.id == id_tarefa).first()
+    tarefa = WmsSeparadoresTarefas.query.filter_by(id=id_tarefa).first()
     if tarefa:
-        return json_response(obj='TAREFA')
+        return jsonify('TAREFA')
     else:
         return json_error_response()
+
 
 def json_buscar_produto(id_produto):
     """
@@ -528,47 +530,43 @@ def json_buscar_produto(id_produto):
     """
     produto = WmsItems.query.filter(WmsItems.idCiss == id_produto).first()
     if produto:
-        return json_response(obj=produto.descricao)
+        return jsonify(produto.descricao)
     else:
         return json_error_response()
 
-def json_buscar_colaborador(id_produto, id_onda=None , id_tarefa=None):
+
+def json_buscar_colaborador(id_produto, id_onda=None, id_tarefa=None):
     tarefas = Tarefas.query.filter(Tarefas.id_tarefa == id_tarefa).first()
     id_tarefas = [int(v) for v in tarefas.lista_ids_wms.split(',')]
-    colaborador = WmsSeparadoresTarefas.query.filter(WmsSeparadoresTarefas.idOnda == id_onda)\
-                                             .filter(WmsSeparadoresTarefas.idProduto == id_produto)\
-                                             .filter(WmsSeparadoresTarefas.idTipoTarefa.in_(id_tarefas))
+
+    colaborador = WmsSeparadoresTarefas.query
+    colaborador = colaborador.filter_by(idOnda=id_onda)
+    colaborador = colaborador.filter_by(idProduto=id_produto)
+    colaborador = colaborador.filter(WmsSeparadoresTarefas.idTipoTarefa.in_(id_tarefas))
+
     if colaborador.count() > 1:
-        objs = []
-        for c in colaborador:
-            obj = {'id': c.idColaborador, 'nome': c.nomeColaborador}
-            objs.append(obj)
-        return json_response(obj=objs)
+        objs = [{'id': c.idColaborador, 'nome': c.nomeColaborador} for c in colaborador]
+        return jsonify(objs)
+
     elif colaborador.count() == 1:
-        c = colaborador[0]
+        c = colaborador.first()
         obj = [{'id': c.idColaborador, 'nome': c.nomeColaborador}]
-        return json_response(obj=obj)
+        return jsonify(obj)
+
     else:
-        colaborador = WmsColaborador.query.all()
-        objs = []
-        for c in colaborador:
-            obj = {'id': c.id, 'nome': c.nome}
-            objs.append(obj)
-        return json_response(obj=objs)
+        colaboradores = WmsColaborador.query.all()
+        objs = [{'id': c.id, 'nome': c.nome} for c in colaboradores]
+        return jsonify(objs)
 
 
 def json_buscar_erros_tarefa(id_tarefa):
     """
     Função usada para buscar o produto pelo id do produto no WMS
     """
-    erros = Erros.query.filter(Erros.id_tarefa == id_tarefa).first()
-    if erros:
-        erros = Erros.query.filter(Erros.id_tarefa == id_tarefa)
-        j_erros = []
-        for e in erros:
-            j_erro = {'id': e.id_erro, 'descricao': e.descricao}
-            j_erros.append(j_erro)
-        return json_response(obj=j_erros)
+    erros = Erros.query.filter_by(id_tarefa=id_tarefa)
+    if erros.first():
+        json = [{'id': e.id_erro, 'descricao': e.descricao} for e in erros]
+        return json_response(obj=json)
     else:
         return json_error_response()
 

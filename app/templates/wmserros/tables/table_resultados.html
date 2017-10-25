@@ -77,7 +77,11 @@
                     {% endif %}
 
                     <td>{{ "{:.2f}".format(c.total.pontos) }}</td>
-                    <td>{{ "{:.2f}%".format((c.total.pontos*100)/media_pontos_periodo) }}</td>
+                    {% if c.total.pontos != 0 and media_pontos_periodo != 0 %}
+                      <td>{{ "{:.2f}%".format((c.total.pontos*100)/media_pontos_periodo) }}</td>
+                    {% else %}
+                      <td>0.0%</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             {% else %}

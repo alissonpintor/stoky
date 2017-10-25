@@ -67,7 +67,7 @@ def usuarios(id=None):
 
         usuario.username = form.username.data
         usuario.password = form.password.data
-        usuario.role_id = form.acesso.data
+        usuario.role_id = getattr(form.acesso, 'data', None)
         usuario.is_admin = form.is_admin.data
 
         try:
@@ -86,6 +86,7 @@ def usuarios(id=None):
         usuario = User.query.filter_by(id=id).first()
         form.user_id.data = usuario.id
         form.username.data = usuario.username
+        form.acesso.data = usuario.role_id
         form.is_admin.data = usuario.is_admin
 
     return render_template('configuracoes/view_usuarios.html', title='Cadastro de Usuários', usuarios=usuarios, form=form, classe=classe)

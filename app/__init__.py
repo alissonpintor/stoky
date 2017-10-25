@@ -8,7 +8,7 @@ from flask_migrate import Migrate
 from config import app_config
 
 app = Flask(__name__, instance_relative_config=True)
-app.config.from_object(app_config['development'])
+app.config.from_object(app_config['production'])
 app.config.from_pyfile('config.py')
 
 login_manager = LoginManager()
@@ -20,6 +20,12 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 from app import models
 db.create_all(bind=None)
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
+
 
 principals = Principal(app)
 admin_permission = Permission(RoleNeed('admin'))

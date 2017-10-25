@@ -20,8 +20,9 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Cadastrar')
 
     def validate_username(self, field):
-        if User.query.filter_by(username=field.data).first():
-            raise ValidationError('O nome do usuário já esta sendo usado.')
+        if self.user_id.data == 0:
+            if User.query.filter_by(username=field.data).first():
+                raise ValidationError('O nome do usuário já esta sendo usado.')
 
     def validate_acesso(form, field):
         if not form.is_admin.data:
