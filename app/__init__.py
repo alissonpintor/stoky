@@ -24,6 +24,7 @@ db.create_all(bind=None)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
+    db.session.close()
     db.session.remove()
 
 

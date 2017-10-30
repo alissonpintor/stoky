@@ -229,6 +229,7 @@ def calculo_col_tarefas():
     return render_template('wmserros/view_calculo_col_tarefas.html', form=form, separacao_obj=separacao_obj,\
                             conferecia_obj=conferecia_obj)
 
+
 @wmserros.route('/exibir_metas', methods=['GET', 'POST'])
 @login_required
 @logistica_permission.require(http_exception=401)
@@ -370,6 +371,7 @@ def erros(id=None):
 
     return render_template('wmserros/view_erros.html', form=form, erros=erros, classe=classe)
 
+
 @wmserros.route('/informar_erros', methods=['GET', 'POST'])
 @wmserros.route('/informar_erros/<busca>')
 def informar_erros(busca=None):
@@ -435,6 +437,7 @@ def informar_erros(busca=None):
 
     return render_template('wmserros/view_informar_erros.html', tarefas=tarefas)
 
+
 @wmserros.route('/exibir_erros')
 @login_required
 @logistica_permission.require(http_exception=401)
@@ -452,7 +455,7 @@ def exibir_erros():
         total = int(request.args.get('total_remove')) + 1
         for t in range(1, total):
             id_registro = request.args.get('id_%i' % t)
-            registro = RegistroDeErros.query.filter(RegistroDeErros.id_registro == id_registro).first()
+            registro = RegistroDeErros.query.filter_by(id_registro=id_registro).first()
 
             try:
                 db.session.delete(registro)
@@ -462,7 +465,7 @@ def exibir_erros():
 
         json = jsonify()
         json.status_code = 200
-        json.satus = 'Registro Excluido com sucesso'
+        json.status = 'Registro Excluido com sucesso'
         return json
 
     if(limit and offset):
