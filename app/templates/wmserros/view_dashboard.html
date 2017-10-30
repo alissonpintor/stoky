@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+
+  {% for ranking in rankings %}
+    <div class="col-md-4">
+      <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading">{{ ranking.nome|capitalize }}</div>
+
+        <!-- Table -->
+        <table class="table">
+        <thead>
+          <tr>
+            <th>Posição</th>
+            <th>Nome</th>
+            <th>Tarefas Realizadas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for colaborador in ranking %}
+          <tr>
+            <th>{{loop.index}}º</th>
+            <td>{{ colaborador.nomeColaborador|capitalize }}</td>
+            <td>{{ colaborador.qtd_tarefas }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if loop.index % 3 == 0 %}
+      <div class="clearfix visible-block"></div>
+    {% endif %}
+  {% endfor %}
+
+</div>
+
+    {% include 'messages.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $('.lista-ids').mask('0##,#');
+
+  setTimeout(function() {
+    location.reload();
+  }, 30000);
+
+</script>
+{% endblock %}

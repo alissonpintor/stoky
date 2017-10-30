@@ -438,6 +438,34 @@ def informar_erros(busca=None):
     return render_template('wmserros/view_informar_erros.html', tarefas=tarefas)
 
 
+@wmserros.route('/dashboard')
+@wmserros.route('/dashboard/<string:page>')
+def dashboard(page=None):
+
+    if page == 'ranking' or page is None:
+        tarefas = Tarefas.query.all()
+        rankings = []
+        for t in tarefas:
+            # pega os ids das tarefas do WMS na tarefa selecionada
+            tarefas_id = [int(v) for v in t.lista_ids_wms.split(',')]
+
+            # Query que ira conter o total de tarefas realizados por colaborador
+            #   VERIFICAR: esta puxando subtarefas
+            ranking = db.session.query(WmsSeparadoresTarefas.nomeColaborador,\
+                                     db.func.count(WmsSeparadoresTarefas.id).label('qtd_tarefas'))
+
+            ranking = ranking.filter(WmsSeparadoresTarefas.dataTarefa >= date.today())
+            ranking = ranking.filter(WmsSeparadoresTarefas.idTipoTarefa.in_(tarefas_id))
+
+            ranking = ranking.group_by(WmsSeparadoresTarefas.nomeColaborador)
+            ranking = ranking.order_by(db.desc('qtd_tarefas')).limit(3)
+
+            ranking.nome = t.descricao
+            rankings.append(ranking)
+
+    return render_template('wmserros/view_dashboard.html', rankings=rankings)
+
+
 @wmserros.route('/exibir_erros')
 @login_required
 @logistica_permission.require(http_exception=401)
