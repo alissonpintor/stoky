@@ -1,40 +1,95 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
+<div class="row" style="font-size: 135%">
 
-  {% for ranking in rankings %}
+  {% if rankings %}
+    {% for ranking in rankings %}
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <!-- Default panel contents -->
+          <div class="panel-heading"><b>{{ ranking.nome|capitalize }}</b></div>
+
+          <!-- Table -->
+          <table class="table">
+          <thead>
+            <tr>
+              <th>Posição</th>
+              <th>Nome</th>
+              <th>Tarefas Realizadas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for colaborador in ranking %}
+            <tr>
+              <th>{{loop.index}}º</th>
+              <td>{{ colaborador.nomeColaborador|capitalize }}</td>
+              <td>{{ colaborador.qtd_tarefas }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+        </div>
+      </div>
+
+      {% if loop.index % 3 == 0 %}
+        <div class="clearfix visible-block"></div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {% if resumo %}
+    {% for key, tarefas in resumo.items() %}
     <div class="col-md-4">
       <div class="panel panel-default">
         <!-- Default panel contents -->
-        <div class="panel-heading">{{ ranking.nome|capitalize }}</div>
+        <div class="panel-heading"><b>Resumo de Tarefas {{ key|capitalize }}</b></div>
 
         <!-- Table -->
-        <table class="table">
-        <thead>
-          <tr>
-            <th>Posição</th>
-            <th>Nome</th>
-            <th>Tarefas Realizadas</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for colaborador in ranking %}
-          <tr>
-            <th>{{loop.index}}º</th>
-            <td>{{ colaborador.nomeColaborador|capitalize }}</td>
-            <td>{{ colaborador.qtd_tarefas }}</td>
-          </tr>
+        <ul class="list-group">
+        {% for tarefa in tarefas %}
+          {% for descricao, resultado in tarefa.items() %}
+          <li class="list-group-item">
+            <span class="badge">{{ resultado }}</span>
+            {{ descricao }}
+          </li>
           {% endfor %}
-        </tbody>
-        </table>
+        {% endfor %}
+
+        {% if key == 'pendentes' %}
+          {% if bloqueadas %}
+            <li class="list-group-item">
+              <span class="badge">{{ bloqueadas.qtdade }}</span>
+              Separações Bloqueadas
+            </li>
+          {% endif %}
+        {% endif %}
+        </ul>
+
       </div>
     </div>
+    {% endfor %}
+  {% endif %}
 
-    {% if loop.index % 3 == 0 %}
-      <div class="clearfix visible-block"></div>
-    {% endif %}
-  {% endfor %}
+  {% if bloqueadas %}
+    <div class="clearfix visible-block"></div>
+
+    <div class="col-md-4">
+      <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading"><b>Tarefas Bloqueadas</b></div>
+
+        <!-- Table -->
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="badge">{{ bloqueadas.qtdade }}</span>
+            Separações Bloqueadas
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  {% endif %}
 
 </div>
 
@@ -47,7 +102,7 @@
 
   setTimeout(function() {
     location.reload();
-  }, 30000);
+  }, 60000);
 
 </script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from app import app, db, logistica_permission
 from flask import render_template, abort, make_response, session
-from flask import request, redirect, url_for, flash
+from flask import request, redirect, url_for, flash, make_response
 from flask_login import login_required
 from flask import jsonify
 from flask.json import dumps
@@ -439,10 +439,14 @@ def informar_erros(busca=None):
 
 
 @wmserros.route('/dashboard')
-@wmserros.route('/dashboard/<string:page>')
-def dashboard(page=None):
+def dashboard():
 
-    if page == 'ranking' or page is None:
+    rankings = None
+    bloqueadas = None
+    resumo_tarefas = {}
+    pagina = request.cookies.get('pagina')
+
+    if pagina == 'ranking' or pagina is None:
         tarefas = Tarefas.query.all()
         rankings = []
         for t in tarefas:
@@ -460,10 +464,59 @@ def dashboard(page=None):
             ranking = ranking.group_by(WmsSeparadoresTarefas.nomeColaborador)
             ranking = ranking.order_by(db.desc('qtd_tarefas')).limit(3)
 
-            ranking.nome = t.descricao
-            rankings.append(ranking)
+            if ranking.first():
+                ranking.nome = t.descricao
+                rankings.append(ranking)
 
-    return render_template('wmserros/view_dashboard.html', rankings=rankings)
+    if pagina == 'resumo-geral':
+        tarefas = Tarefas.query.all()
+        separacao_id = [4, 7]
+
+        total = []
+        pendentes = []
+        concluidas = []
+
+        for t in tarefas:
+            tarefas_id = t.getIdsTarefa()
+
+            result = db.session.query(db.func.count(WmsTarefasCd.id_tarefa_cd).label('qtdade'))
+            result = result.filter(WmsTarefasCd.data_tarefa >= date.today())
+            result = result.filter(WmsTarefasCd.id_tipo_tarefa.in_(tarefas_id))
+
+            total_result = result.first()
+            if total_result.qtdade:
+                total.append({t.descricao: total_result.qtdade})
+
+            concluidas_result = result.filter(WmsTarefasCd.data_fim.isnot(None)).first()
+            if concluidas_result.qtdade:
+                concluidas.append({t.descricao: concluidas_result.qtdade})
+
+            pendentes_result = result.filter(WmsTarefasCd.data_fim.is_(None)).first()
+            if pendentes_result.qtdade:
+                pendentes.append({t.descricao: pendentes_result.qtdade})
+
+            resumo_tarefas['total'] = total
+            resumo_tarefas['concluidas'] = concluidas
+            resumo_tarefas['pendentes'] = pendentes
+
+        bloqueadas = db.session.query(db.func.count(WmsTarefasCd.id_tarefa_cd).label('qtdade'))
+        bloqueadas = bloqueadas.filter_by(liberada='N')
+        bloqueadas = bloqueadas.filter(WmsTarefasCd.id_tar_bloqueadora.isnot(None))
+        bloqueadas = bloqueadas.filter(WmsTarefasCd.id_tipo_tarefa.in_(separacao_id)).first()
+
+    resp = make_response(render_template('wmserros/view_dashboard.html', rankings=rankings, bloqueadas=bloqueadas, resumo=resumo_tarefas))
+
+    paginas = ['ranking', 'resumo-geral']
+    if pagina and pagina in paginas:
+        index = paginas.index(pagina) + 1
+        if index < len(paginas):
+            resp.set_cookie('pagina', paginas[index])
+        else:
+            resp.set_cookie('pagina', paginas[0])
+    else:
+        resp.set_cookie('pagina', paginas[0])
+
+    return resp
 
 
 @wmserros.route('/exibir_erros')

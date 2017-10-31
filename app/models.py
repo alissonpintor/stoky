@@ -297,6 +297,9 @@ class Tarefas(db.Model):
     qtdade_min_colaborador = db.Column(db.Integer, default=1)
     flag_meta_variavel = db.Column(db.Boolean, default=False)
 
+    def getIdsTarefa(self):
+        return [int(v) for v in self.lista_ids_wms.split(',')]
+
 class PontuacaoMetaLogistica(db.Model):
     __tablename__ = 'tbl_meta_logistica'
     id_meta = db.Column(db.Integer, primary_key=True)
@@ -378,6 +381,7 @@ class WmsEstoqueCd(db.Model):
     id_produto = db.Column('ITEM_COD_ITEM_LOG', db.String(20))
     qtdade     = db.Column('QTD', db.Numeric(17, 4))
 
+
 class WmsPredio(db.Model):
     __bind_key__  = 'wms'
     __tablename__ = 'WMS_PREDIOS'
@@ -387,6 +391,7 @@ class WmsPredio(db.Model):
     id_regiao  = db.Column('REGIAO_SEPARACAO', db.ForeignKey('WMS_REGIOES_SEPARACOES.COD_REGSEP'))
 
     regiao     = db.relationship('WmsRegiaoSeparacao', backref=db.backref('predio'))
+
 
 class WmsSeparadoresTarefas(db.Model):
     __bind_key__  = 'wms'
@@ -399,6 +404,7 @@ class WmsSeparadoresTarefas(db.Model):
     idTipoTarefa = db.Column('TAREFAS_COD_TAREFA', db.Integer)
     dataTarefa = db.Column('DTHR', db.Date())
 
+
 class WmsTarefasCd(db.Model):
     __bind_key__ = 'wms'
     __tablename__ = 'WMS_TAREFAS_CD'
@@ -408,6 +414,10 @@ class WmsTarefasCd(db.Model):
     id_tipo_tarefa = db.Column('TAREFAS_COD_TAREFA', db.String(6))
     id_predio_origem = db.Column('LA_PREDIO_PREDIO_ID_ORIGEM', db.ForeignKey('WMS_PREDIOS.PREDIO_ID'))
     liberada = db.Column('LIBERADA', db.String(1), db.CheckConstraint("liberada == 'S' or liberada == 'N'"))
+    id_tar_bloqueadora = db.Column('TARCD_COD_TAREFA_CD', db.Integer)
+    qtdade_executada = db.Column('QTD_EXECUTADA', db.Integer)
     data_tarefa = db.Column('DTHR', db.Date())
+    data_inicio = db.Column('DT_INICIO', db.Date())
+    data_fim = db.Column('DT_FIM', db.Date())
 
     predio = db.relationship('WmsPredio', backref=db.backref('tarefas'))

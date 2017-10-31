@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -24,8 +24,7 @@ db.create_all(bind=None)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
-    db.session.close()
-    db.session.remove()
+    db.session.close_all()
 
 
 principals = Principal(app)
