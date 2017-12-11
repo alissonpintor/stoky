@@ -5,6 +5,7 @@ from flask_login import login_required
 from flask import jsonify
 from flask.json import dumps
 import flask_excel as excel
+from flask_mail import Message
 
 from datetime import datetime, date
 import calendar
@@ -19,13 +20,16 @@ from sqlalchemy import exc as core_exc
 from . import wmserros
 
 # import app
-from .. import app
+from .. import mail
+
+from app.shared.colors import Color
+from app.shared.charts import BaseChart, Data, Dataset, LineChart
 
 # Classes Models de Wms Erros
 from ..models import Tarefas, Erros, RegistroDeErros, WmsOnda, WmsColaborador
 from ..models import WmsItems, WmsSeparadoresTarefas, PontuacaoMetaLogistica
 from ..models import MetaTarefa, ParametrosMetas, WmsTarefasCd, WmsPredio, WmsRegiaoSeparacao
-from ..models import ViewSaldoProduto, ViewProduto, WmsEstoqueCd, EstoqueSaldo
+from ..models import ViewSaldoProduto, ViewProduto, WmsEstoqueCd, EstoqueSaldo, StokyMetasView
 
 # Formularios
 from .forms import TarefasForm, ErrosForm, BuscarMetasForm
@@ -78,6 +82,7 @@ def deletar(path, id):
         message = {'type': 'error', 'content': 'Nao foi possivel excluir. Erro de Integridade'}
         flash(message)
         return redirect(url_for(TABLES[path]['url_padrao']))
+
 
 @wmserros.route('/parametros', methods=['GET', 'POST'])
 @wmserros.route('/parametros/<id>')
@@ -441,74 +446,83 @@ def informar_erros(busca=None):
 @wmserros.route('/dashboard')
 def dashboard():
 
-    rankings = None
-    bloqueadas = None
-    resumo_tarefas = {}
-    pagina = request.cookies.get('pagina')
+    rankings = None  # lista com o ranking dos 3 primeiros por tarefa.
+    bloqueadas = None  # Informações de quantidade de separações bloqueadas.
+    resumo_tarefas = {}  # Total de tarefas geradas, concluidas e pendentes.
+    pagina = request.cookies.get('pagina')  # cookie para definir a proxima página a ser exibida.
 
     if pagina == 'ranking' or pagina is None:
+
         tarefas = Tarefas.query.all()
-        rankings = []
-        for t in tarefas:
-            # pega os ids das tarefas do WMS na tarefa selecionada
-            tarefas_id = [int(v) for v in t.lista_ids_wms.split(',')]
+        rankings = []  # Inicia a variavel como uma lista.
 
+        for tarefa in tarefas:
             # Query que ira conter o total de tarefas realizados por colaborador
-            #   VERIFICAR: esta puxando subtarefas
-            ranking = db.session.query(WmsSeparadoresTarefas.nomeColaborador,\
-                                     db.func.count(WmsSeparadoresTarefas.id).label('qtd_tarefas'))
+            ranking = db.session.query(WmsSeparadoresTarefas.nomeColaborador,
+                                       db.func.count(WmsSeparadoresTarefas.id).label('qtd_tarefas'))
 
+            # Aplica os filtros da busca
             ranking = ranking.filter(WmsSeparadoresTarefas.dataTarefa >= date.today())
-            ranking = ranking.filter(WmsSeparadoresTarefas.idTipoTarefa.in_(tarefas_id))
+            ranking = ranking.filter(WmsSeparadoresTarefas.idTipoTarefa.in_(tarefa.getIdsTarefa()))
 
+            # agrupa e ordena a busca
             ranking = ranking.group_by(WmsSeparadoresTarefas.nomeColaborador)
             ranking = ranking.order_by(db.desc('qtd_tarefas')).limit(3)
 
+            # verifica se existe algum registro na query antes de usar os dados
             if ranking.first():
-                ranking.nome = t.descricao
+                ranking.nome = tarefa.descricao
                 rankings.append(ranking)
 
     if pagina == 'resumo-geral':
         tarefas = Tarefas.query.all()
-        separacao_id = [4, 7]
 
         total = []
         pendentes = []
         concluidas = []
 
-        for t in tarefas:
-            tarefas_id = t.getIdsTarefa()
+        for tarefa in tarefas:
 
             result = db.session.query(db.func.count(WmsTarefasCd.id_tarefa_cd).label('qtdade'))
             result = result.filter(WmsTarefasCd.data_tarefa >= date.today())
-            result = result.filter(WmsTarefasCd.id_tipo_tarefa.in_(tarefas_id))
+            result = result.filter(WmsTarefasCd.id_tipo_tarefa.in_(tarefa.getIdsTarefa()))
 
+            # Pega o total de tarefas por geradas.
             total_result = result.first()
-            if total_result.qtdade:
-                total.append({t.descricao: total_result.qtdade})
+            if total_result and total_result.qtdade:
+                total.append({tarefa.descricao: total_result.qtdade})
 
+            # Pega o total de tarefas concluidas.
             concluidas_result = result.filter(WmsTarefasCd.data_fim.isnot(None)).first()
-            if concluidas_result.qtdade:
-                concluidas.append({t.descricao: concluidas_result.qtdade})
+            if concluidas_result and concluidas_result.qtdade:
+                concluidas.append({tarefa.descricao: concluidas_result.qtdade})
 
-            pendentes_result = result.filter(WmsTarefasCd.data_fim.is_(None)).first()
-            if pendentes_result.qtdade:
-                pendentes.append({t.descricao: pendentes_result.qtdade})
+            # Pega o total de tarefas pendentes.
+            pendentes_result = None  # result.filter(WmsTarefasCd.data_fim.is_(None)).first()
+            if pendentes_result and pendentes_result.qtdade:
+                pendentes.append({tarefa.descricao: pendentes_result.qtdade})
 
             resumo_tarefas['total'] = total
             resumo_tarefas['concluidas'] = concluidas
             resumo_tarefas['pendentes'] = pendentes
 
+        # Pega a quantidade de tarefas bloqueadas
         bloqueadas = db.session.query(db.func.count(WmsTarefasCd.id_tarefa_cd).label('qtdade'))
+
+        # Filtros necessários para pegar as tarefas bloqueadas
         bloqueadas = bloqueadas.filter_by(liberada='N')
         bloqueadas = bloqueadas.filter(WmsTarefasCd.id_tar_bloqueadora.isnot(None))
-        bloqueadas = bloqueadas.filter(WmsTarefasCd.id_tipo_tarefa.in_(separacao_id)).first()
+        bloqueadas = bloqueadas.filter(WmsTarefasCd.id_tipo_tarefa.in_([4, 7])).first()
 
     resp = make_response(render_template('wmserros/view_dashboard.html', rankings=rankings, bloqueadas=bloqueadas, resumo=resumo_tarefas))
 
+    # Verifica qual pagina esta sendo retornada e altera o cookie 'pagina'
+    # para que na proxima requizição seja retorna a outra pagina
     paginas = ['ranking', 'resumo-geral']
+
     if pagina and pagina in paginas:
         index = paginas.index(pagina) + 1
+
         if index < len(paginas):
             resp.set_cookie('pagina', paginas[index])
         else:
@@ -517,6 +531,91 @@ def dashboard():
         resp.set_cookie('pagina', paginas[0])
 
     return resp
+
+
+@wmserros.route('/charts')
+def charts():
+    tarefas = Tarefas.query.all()
+    labels = []
+    results = []
+
+    dataset = Dataset('label', data=[100, 200, 300, 50, 30, 40, 80])
+    dataset02 = Dataset('label 02', data=[75, 500, 800, 120, 410, 77, 199])
+    data = Data(labels=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+    data.addDataset(dataset)
+    data.addDataset(dataset02)
+
+    c = BaseChart('Teste 01', data=data)
+
+    l2 = []
+    dt2 = Dataset('label')
+
+    # Teste de envio de email
+    msg = Message("Hello",
+                  sender=('Alisson Stoky', "alisson.stoky@gmail.com"),
+                  recipients=["alissonpintor@gmail.com"])
+    msg.body = "testing"
+    mail.send(msg)
+
+    for tarefa in tarefas:
+
+        result = db.session.query()
+        result = result.add_column(db.func.count(WmsTarefasCd.id_tarefa_cd).label('qtdade'))
+        result = result.filter(WmsTarefasCd.data_tarefa >= date.today())
+        result = result.filter(WmsTarefasCd.id_tipo_tarefa.in_(tarefa.getIdsTarefa()))
+
+        # Pega o total de tarefas por geradas.
+        total_result = result.first()
+
+        result = []
+        if total_result and total_result.qtdade:
+            labels.append(tarefa.descricao)
+            results.append(total_result.qtdade)
+            result.append(total_result.qtdade)
+
+            l2.append(tarefa.descricao)
+            dt2.addData(total_result.qtdade)
+
+    d2 = Data(labels=l2)
+    d2.addDataset(dt2)
+    c2 = BaseChart('Tarefas', data=d2, ctype='pie', _id='pieChart')
+
+    currentYear = date.today().year
+    pastSales = []
+    currentSales = []
+
+    # Define as colunas que vao ser retornadas na consulta em StokyMetasView
+    queryPastSales = db.session.query((db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('valor'))
+    # Define os filtros da consulta
+    queryPastSales = queryPastSales.filter(StokyMetasView.dt_movimento.between(date(currentYear-1, 1, 1), date(currentYear-1, 12, 31)))
+    queryPastSales = queryPastSales.group_by(db.func.month(StokyMetasView.dt_movimento))
+
+    months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
+    dataTotalSales = Data(labels=months)
+
+    datasetPastSales = Dataset("Vendas 2016")
+    for monthSales in queryPastSales:
+        datasetPastSales.addData(str(monthSales.valor))
+
+    dataTotalSales.addDataset(datasetPastSales)
+
+    # Define as colunas que vao ser retornadas na consulta em StokyMetasView
+    queryCurrentSales = db.session.query((db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('valor'))
+    # Define os filtros da consulta
+    queryCurrentSales = queryCurrentSales.filter(StokyMetasView.dt_movimento.between(date(currentYear, 1, 1), date(currentYear, 12, 31)))
+    queryCurrentSales = queryCurrentSales.group_by(db.func.month(StokyMetasView.dt_movimento))
+
+    datasetCurrentSales = Dataset("Vendas 2017")
+    for monthSales in queryCurrentSales:
+        datasetCurrentSales.addData(str(monthSales.valor))
+
+    datasetCurrentSales.addData(str(0.0))
+
+    dataTotalSales.addDataset(datasetCurrentSales)
+
+    lineChart = LineChart('Comparativo de Vendas', data=dataTotalSales, _id='lineChart')
+
+    return render_template('wmserros/charts.html', bg=Color.generate(len(labels), 0.8), labels=labels, results=results, charts=c, charts2=c2, lineChart=lineChart)
 
 
 @wmserros.route('/exibir_erros')

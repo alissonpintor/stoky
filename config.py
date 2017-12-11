@@ -24,6 +24,8 @@ class ProductionConfig(Config):
     """
 
     DEBUG = False
+    SQLALCHEMY_POOL_RECYCLE = 3600
+    SQLALCHEMY_POOL_TIMEOUT = 30
 
 app_config = {
     'development': DevelopmentConfig,
