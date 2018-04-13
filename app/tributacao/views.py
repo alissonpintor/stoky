@@ -23,7 +23,7 @@ def ajusta_tributacao():
         if 'id_autorizacao' in session:
             autorizacao = ConfereMercadoria.query.filter(ConfereMercadoria.id_autorizacao == session['id_autorizacao'])
 
-            if autorizacao:
+            if autorizacao.first():
                 uf_fornecedor = autorizacao[0].autorizacao.fornecedor.uf_cli_for
                 prod_principal = [p.id_produto for p in autorizacao]
                 prods = [p.id_subproduto for p in autorizacao]
@@ -73,7 +73,7 @@ def ajusta_tributacao():
                         pt.per_icms_ent = 0
                         pt.per_margem_subst = 45 if radio_cgmedia == 'F' else 0
                         pt.per_icms_subst = 7 if radio_cgmedia == 'F' else 0
-                        pt.per_margem_original = 0
+                        pt.per_margem_original = 45
                         pt.tipo_trib_ent = 'F' if radio_subst == 'T' else 'T'
                         pt.id_sit_trib = 60 if radio_subst == 'T' else 90
 
@@ -90,11 +90,11 @@ def ajusta_tributacao():
         if form.validate_on_submit():
             session['id_autorizacao'] = form.numero.data
             autorizacao = ConfereMercadoria.query.filter(ConfereMercadoria.id_autorizacao == form.numero.data)
-            if autorizacao:
+            if autorizacao.first():
                 produtos = autorizacao
                 nota = autorizacao[0].autorizacao
             else:
-                message = {'type': 'warning', 'content': 'A autorização deve ser concluída no WMS primeiro.'}
+                message = {'type': 'warning', 'content': 'A autorização não existe ou deve ser concluída no WMS primeiro.'}
                 flash(message)
 
     return render_template('tributacao/view_ajusta_tributacao.html', title='Ajuste de tributação dos produtos', form=form, nota=nota, produtos=produtos)

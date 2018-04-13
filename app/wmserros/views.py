@@ -580,6 +580,9 @@ def charts():
     d2.addDataset(dt2)
     c2 = BaseChart('Tarefas', data=d2, ctype='pie', _id='pieChart')
 
+    import chartjs
+    line = chartjs.chart(title = "Comparativo de Vendas", ctype = "Line", width = 640, height = 480)
+
     currentYear = date.today().year
     pastSales = []
     currentSales = []
@@ -593,11 +596,17 @@ def charts():
     months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
     dataTotalSales = Data(labels=months)
 
+    line.set_labels(months)
+
     datasetPastSales = Dataset("Vendas 2016")
+    past = []
     for monthSales in queryPastSales:
         datasetPastSales.addData(str(monthSales.valor))
+        past.append(monthSales.valor)
 
     dataTotalSales.addDataset(datasetPastSales)
+
+    line.add_dataset(past)
 
     # Define as colunas que vao ser retornadas na consulta em StokyMetasView
     queryCurrentSales = db.session.query((db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('valor'))
@@ -606,16 +615,73 @@ def charts():
     queryCurrentSales = queryCurrentSales.group_by(db.func.month(StokyMetasView.dt_movimento))
 
     datasetCurrentSales = Dataset("Vendas 2017")
+    current = []
     for monthSales in queryCurrentSales:
-        datasetCurrentSales.addData(str(monthSales.valor))
-
-    datasetCurrentSales.addData(str(0.0))
+        import locale
+        locale.setlocale(locale.LC_ALL, '')
+        sale = locale.currency(monthSales.valor, grouping=True)
+        print(sale)
+        datasetCurrentSales.addData('{:10.2f}'.format(monthSales.valor))
+        current.append(monthSales.valor)
 
     dataTotalSales.addDataset(datasetCurrentSales)
+    line.add_dataset(current)
 
     lineChart = LineChart('Comparativo de Vendas', data=dataTotalSales, _id='lineChart')
 
-    return render_template('wmserros/charts.html', bg=Color.generate(len(labels), 0.8), labels=labels, results=results, charts=c, charts2=c2, lineChart=lineChart)
+    return render_template('wmserros/charts.html', bg=Color.generate(len(labels), 0.8), labels=labels, results=results, charts=c, charts2=c2, lineChart=lineChart, line=line)
+
+
+@wmserros.route('/pygal')
+def pygal():
+    import locale
+    locale.setlocale(locale.LC_ALL, '')
+
+    months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
+    currentYear = date.today().year
+
+    # Define as colunas que vao ser retornadas na consulta em StokyMetasView
+    queryPastSales = db.session.query((db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('valor'))
+    # Define os filtros da consulta
+    queryPastSales = queryPastSales.filter(StokyMetasView.dt_movimento.between(date(currentYear-1, 1, 1), date(currentYear-1, 12, 31)))
+    queryPastSales = queryPastSales.group_by(db.func.month(StokyMetasView.dt_movimento))
+    past = []
+    for monthSales in queryPastSales:
+        past.append(monthSales.valor)
+
+    # Define as colunas que vao ser retornadas na consulta em StokyMetasView
+    queryCurrentSales = db.session.query((db.func.sum(StokyMetasView.val_venda) + db.func.sum(StokyMetasView.val_devolucao)).label('valor'))
+    # Define os filtros da consulta
+    queryCurrentSales = queryCurrentSales.filter(StokyMetasView.dt_movimento.between(date(currentYear, 1, 1), date(currentYear, 12, 31)))
+    queryCurrentSales = queryCurrentSales.group_by(db.func.month(StokyMetasView.dt_movimento))
+    current = []
+    for monthSales in queryCurrentSales:
+        current.append(monthSales.valor)
+
+    import pygal as pl
+    from pygal.style import CleanStyle, LightenStyle
+
+    config = pl.Config()
+    config.show_legend = True
+    config.human_readable = True
+    config.value_formatter = lambda x: locale.currency(x, grouping=True)
+    config.fill = True
+
+    my_style = LightenStyle('#336676', base_style=CleanStyle)
+    bar_chart = pl.HorizontalBar(config, style=my_style)
+    bar_chart.title = 'Comparativo de Vendas 2016/2017'
+    bar_chart.x_labels = months
+    bar_chart.y_labels = [1000000, 2000000, 3000000, 4000000]
+    bar_chart.add('Vendas 2016', past)
+    bar_chart.add('Vendas 2017', current)
+
+    line_chart = pl.Line()
+    line_chart.add('Fibonacci', [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55])
+    line_chart.add('Padovan', [1, 1, 1, 2, 2, 3, 4, 5, 7, 9, 12])
+
+    return render_template('wmserros/pygal.html',
+                           bar_chart=bar_chart.render_data_uri(),
+                           line_chart=line_chart.render_data_uri())
 
 
 @wmserros.route('/exibir_erros')
@@ -722,7 +788,8 @@ def json_buscar_colaborador(id_produto, id_onda=None, id_tarefa=None):
     tarefas = Tarefas.query.filter(Tarefas.id_tarefa == id_tarefa).first()
     id_tarefas = [int(v) for v in tarefas.lista_ids_wms.split(',')]
 
-    colaborador = WmsSeparadoresTarefas.query
+    colaborador = db.session.query(WmsSeparadoresTarefas.idColaborador,
+                                   WmsSeparadoresTarefas.nomeColaborador)
     colaborador = colaborador.filter_by(idOnda=id_onda)
     colaborador = colaborador.filter_by(idProduto=id_produto)
     colaborador = colaborador.filter(WmsSeparadoresTarefas.idTipoTarefa.in_(id_tarefas))

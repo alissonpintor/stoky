@@ -88,9 +88,8 @@ class BaseChart():
         self._html = []
         self._script = []
         self._data = None
-        self._options = []
-        self._options.append({'title': {'display': 'true', 'text': title}})
-        self._options.append(', ')
+        self._options = {}
+        self._options['title'] = {'display': 'true', 'text': title}
 
         if data and type(data) == Data:
             self._data = data
@@ -104,10 +103,7 @@ class BaseChart():
         self._data = data
 
     def generateHTML(self):
-        self._html.append('<div class="col-md-12">')
         self._html.append('<canvas id="%s" width="auto" height="auto"></canvas>' % self._id)
-        self._html.append('</div>')
-
         return HTMLString(''.join(self._html))
 
     def generateScript(self):
@@ -115,7 +111,7 @@ class BaseChart():
         self._script.append("var barChart = new Chart(ctx, {")
         self._script.append("type: '{}', ".format(self._type))
         self._script.append("data: {}, ".format(self._data.generate()))
-        self._script.append("options: {} ".format(''.join(map(str, self._options))))
+        self._script.append("options: {}".format(''.join(map(str, [self._options]))))
         self._script.append('});')
 
         return HTMLString(''.join(self._script))
@@ -124,8 +120,8 @@ class BaseChart():
 class LineChart(BaseChart):
     def __init__(self, title, data=None, option=None, ctype='line', _id=None):
         super(LineChart, self).__init__(title, data=data, option=option, ctype=ctype, _id=_id)
-        self._options.append({'elements': {'line': {'tension': 0}}})
-
+        self._options['elements'] = {'line': {'tension': 0}}
+        self._options['tooltipTemplate'] = {'line': {'tension': 0}}
 
 
 
