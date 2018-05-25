@@ -1,0 +1,36 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{title or 'Sistema Login'}}</title>
+
+    <meta charset="utf-8"/>
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/normalize.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/icone.ico') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/jquery-ui.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icone.ico') }}">
+</head>
+
+<body>
+  <div class="container" style="margin-top:15px">
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <div class="jumbotron">
+          <h1>Ops!!!, Ouve um problema interno no sistema.</h1>
+          <p>Parece que a página que voce está tentando acessar esta com algum problema.</p>
+          <div class="alert alert-danger" role="alert">
+            <p><b>ERRO:</b> {{ error.class }}</p>
+            <p>{{ error.message }}</p>
+            <p><b>Endpoint:</b> {{ error.endpoint }}</p>
+          </div>
+          <p><a class="btn btn-primary btn-lg" href="/" role="button">Voltar para a pagina Inicial</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
