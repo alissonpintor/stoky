@@ -80,6 +80,19 @@ div#load {
   background-color: #fcded4 !important;
 }
 
+.h3-print {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.table-print {
+	margin-bottom: 0;
+}
+
+.table-print>tbody>tr>td {
+	height: 2px;
+}
+
 .footer {
   position: fixed;
   bottom: 0;

@@ -28,6 +28,6 @@ class ProductionConfig(Config):
     SQLALCHEMY_POOL_TIMEOUT = 30
 
 app_config = {
-    'development': DevelopmentConfig,
-    'production' : ProductionConfig
+    'dev': DevelopmentConfig,
+    'prod' : ProductionConfig
 }

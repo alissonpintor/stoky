@@ -421,3 +421,81 @@ class WmsTarefasCd(db.Model):
     data_fim = db.Column('DT_FIM', db.Date())
 
     predio = db.relationship('WmsPredio', backref=db.backref('tarefas'))
+
+
+class WmsPedidos(db.Model):
+    """
+        representa a tabela Pedidos do WMS que contem
+        todos os pedidos sincronizados emtre o Ciss 
+        e o WMS.
+    """
+    
+    __bind_key__ = 'wms'
+    __tablename__ = 'PEDIDOS'
+
+    id = db.Column(db.Numeric(10,0), primary_key=True)
+    num_pedido = db.Column(db.String(10))
+    nome_cliente = db.Column(db.String(100))
+    situacao_erp = db.Column(db.String(2))
+    dt_emissao = db.Column(db.Date())
+    cidade = db.Column(db.String(50))
+    uf = db.Column(db.String(3))
+
+    join = "and_("
+    join = join + "WmsPedidos.id==WmsItensCheckout.pedido_id)"
+
+    volumes = db.relationship(
+        'WmsItensCheckout',
+        primaryjoin=join
+    )
+
+
+class WmsItensCheckout(db.Model):
+    """
+        representa a tabela WMS_ITENS_CHECKOUT do WMS 
+        que contem todos os itens conferidos no WMS.
+    """
+    
+    __bind_key__ = 'wms'
+    __tablename__ = 'WMS_ITENS_CHECKOUT'
+
+    entrega_num_entrega = db.Column(db.Numeric(10,0), primary_key=True)    
+    qtd_volume = db.Column(db.Numeric(12,4))
+    num_volume = db.Column(db.Numeric(5,0))
+    pedido_id = db.Column(
+        db.ForeignKey('PEDIDOS.id',
+        primary_key=True)
+    )
+    item_cod_item = db.Column(
+        db.ForeignKey('ITEM.CODIGO',
+        primary_key=True)
+    )
+
+    join = "WmsItems.idCiss==WmsItensCheckout.item_cod_item"
+
+    produtos = db.relationship(
+        'WmsItems',
+        primaryjoin=join
+    )
+
+
+class WmsViewRomaneioSeparacao(db.Model):
+    """
+        Representa a View STOKY_ROMANEIO_SEPARACAO para
+        gerar o relatorio de sepacao dos produtos que
+        estao marcados para fazer separacao manual
+    """
+    __tablename__ = 'STOKY_ROMANEIO_SEPARACAO'
+    __bind_key__ = 'wms'
+
+    onda_onda_id = db.Column(db.Numeric(12,4), primary_key=True)
+    num_pedido = db.Column(db.Numeric(12,4))
+    nome_cliente = db.Column(db.String(100))
+    dt_emissao = db.Column(db.Date())
+    cidade = db.Column(db.String(100))
+    observacao = db.Column(db.String(100))
+    cod_ciss = db.Column('ITELOG_ITEM_COD_ITEM', db.String(100))
+    descricao = db.Column(db.String(100))
+    qtd = db.Column(db.String(100))
+    unidade_medida = db.Column(db.String(10))
+

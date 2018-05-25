@@ -1,0 +1,17 @@
+
+@page { 
+    size: 80mm 30cm; 
+    margin: 0.1cm 
+}
+
+@media print {
+    body {
+        font-size: 12px;
+        font-family: Helvetica, Arial, sans-serif !important;
+    }
+
+    .list-group-item {
+        border-color: black;
+        padding: 0.1cm
+    }
+}

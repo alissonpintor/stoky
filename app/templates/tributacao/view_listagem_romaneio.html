@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12 hidden-print">
+            <h3>{{ title }}</h3>
+            <hr />
+    </div>
+    {% include 'messages.html' %}
+    <div class="col-md-8 col-md-offset-2">
+      {% import "bootstrap/utils.html" as utils %}
+      {% import "bootstrap/wtf.html" as wtf %}
+
+      <div class="row">
+        <div class="col-md-12">
+          <h3>{{ descricao|capitalize }}</h3>
+        </div>
+        <div class="col-md-4">
+          <p>Data e Hora: {{ datahora }}</p>
+        </div>
+        <div class="col-md-6">
+            <p>Período: {{ periodo_busca }}</p>
+        </div>
+        <div class="col-md-2">
+            <div class="btn-group no-print"> 
+              <a class="btn btn-primary" target="_blank" aria-label="Left Align" href="{{ url_for('tributacao.logistica_carga_romaneio_pdf') }}">
+                <span class="glyphicon glyphicon-print" aria-hidden="true"> Imprimir</span>
+              </a>
+            </div>
+        </div>
+      </div>
+
+      <hr />
+
+      {% if pedidos %}
+        {% for cidade, clientes in pedidos.items() %}
+          <div>
+            <div class="row">
+              <div>
+                <p class="bg-primary" style="padding: 10px 25px; font-size: 18px">{{ cidade|capitalize }}</p>
+              </div>
+              <div class="col-md-12">
+                  <table class="table table-condensed">
+                    <tbody>
+                      {% for cliente, pedidos in clientes.items() %}
+                      <tr>
+                        <td colspan="6" style="height: 3px; border-top: 0"><p><b>Cliente: {{ cliente }}</b></p></td>
+                      </tr>
+                        {% for pedido in pedidos %}
+                        <tr>
+                          <td colspan="1"></td>
+                          <td colspan="1"><p>Pedido: {{ pedido.numero }}</p></td>
+                          <td colspan="2"><p>Data Emissao: {{ pedido.emissao }}</p></td>
+                          <td colspan="1"><p>Qtd Volumes: {{ pedido.volumes }}</p></td>
+                        </tr>
+
+                        {% if loop.last %}
+                          <tr>
+                            <td colspan="4"></td>
+                            <td colspan="1"><p><b>Total Volumes: {{ pedido.total }}</b></p></td>
+                          </tr>
+                        {% endif %}
+                        {% endfor %}
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+      <hr />
+    </div>
+</div>
+{% endblock %}

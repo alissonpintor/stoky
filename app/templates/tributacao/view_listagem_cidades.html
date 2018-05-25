@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+            <h3>{{ title }}</h3>
+            <hr />
+    </div>
+    {% include 'messages.html' %}
+    <div class="col-md-12">
+      {% import "bootstrap/utils.html" as utils %}
+      {% import "bootstrap/wtf.html" as wtf %}
+
+      {% if form %}
+      <form action="{{ url_for('tributacao.logistica_carga_cidades') }}" method="post" class="form-group">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens='only') }}
+
+        <div class="row">
+
+            <div class="row">
+              <div class="form-group col-md-12">
+              {{ wtf.form_field(form.cidades) }}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="form-group col-md-2">
+              {{ wtf.form_field(form.submit, onclick="loading();") }}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </form>
+      {% endif %}
+
+      <hr />
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  {% if form %}
+  $('#cidades').multiSelect({ 
+    keepOrder: true, 
+    afterSelect: function(value){
+        $('#cidades option[value="'+value+'"]').remove();
+        $('#cidades').append($("<option></option>").attr("value",value).attr('selected', 'selected'));
+      }
+  });
+  {% endif %}
+</script>
+{% endblock %}

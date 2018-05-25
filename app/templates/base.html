@@ -12,6 +12,8 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-table.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/jquery-ui.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/multi-select.dist.css') }}">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/gutenberg-css@0.4" media="print">
     {% block css %}{% endblock %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/icone.ico') }}">
@@ -30,7 +32,7 @@
         {% endblock %}
     </div>
 
-    <footer class="footer">
+    <footer class="footer hidden-print">
       <div class="container">
         <p class="text-muted">
           Usuario: {{ current_user.username }}
@@ -51,6 +53,7 @@
     <script src="{{ url_for('static', filename='js/bootstrap-table.min.js') }}" type="text/javascript" charset="utf-8"></script>
     <script src="{{ url_for('static', filename='js/jquery.mask.min.js') }}" type="text/javascript" charset="utf-8"></script>
     <script src="{{ url_for('static', filename='js/jquery.multi-select.js') }}" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js" type="text/javascript" charset="utf-8"></script>
 
     <!-- <script src="/init-table.js" type="text/javascript" charset="utf-8"></script> -->
     <script src="{{ url_for('static', filename='js/script.js') }}" type="text/javascript" charset="utf-8"></script>

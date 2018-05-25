@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0.2cm;
+            font-size: 11px;
+        }
+        @page { size: A4; margin: 1cm }
+        @media print {
+          .header {
+            margin: 0 auto;
+            padding-left: 20px; 
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid black; 
+          }
+          .report {
+              margin: 0 auto
+          }
+          .table {
+            box-sizing: border-box;
+            border: 1px solid #aaa;
+            border-top: 0;
+            width: 100%;
+            padding: 5px 20px;
+          }
+          .table>tbody>tr {
+            line-height: 7px;
+            height: 7px;
+          }
+          .table>tbody>tr>td {
+              border-top: 1px solid #ccc;
+              border-top-style: dashed;
+              line-height: 7px;
+              height: 7px;
+          }
+          .title {
+              font-size: 18px;
+              font-weight: bold;
+          }
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="col-md-12">
+            <p class="title">{{ descricao|capitalize }}</p>
+          </div>
+          <div class="col-md-4">
+            <p>Data e Hora: {{ datahora }}</p>
+          </div>
+          <div class="col-md-6">
+              <p>Período: {{ periodo_busca }}</p>
+          </div>
+    </div>
+    <div class="report">
+      {% if pedidos %}
+        {% for cidade, clientes in pedidos.items() %}
+          <div>
+            <div class="row">
+              <div>
+                <p class="title">{{ cidade|capitalize }}</p>
+              </div>
+              <hr>
+              <div class="col-md-12">
+                  <table class="table">
+                    <tbody>
+                      {% for cliente, pedidos in clientes.items() %}
+                      <tr>
+                        <td colspan="6" style="height: 3px; border-top: 0"><p><b>Cliente: {{ cliente }}</b></p></td>
+                      </tr>
+                        {% for pedido in pedidos %}
+                        <tr>
+                          <td colspan="2"><p>Pedido: {{ pedido.numero }}</p></td>
+                          <td colspan="2"><p>Data Emissao: {{ pedido.emissao }}</p></td>
+                          <td colspan="1"><p>Qtd Volumes: {{ pedido.volumes }}</p></td>
+                        </tr>
+
+                        {% if loop.last and pedido.volumes < pedido.total%}
+                          <tr>
+                            <td colspan="4"></td>
+                            <td colspan="1"><p><b>Total Volumes: {{ pedido.total }}</b></p></td>
+                          </tr>
+                        {% endif %}
+                        {% endfor %}
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+</body>
+</html>

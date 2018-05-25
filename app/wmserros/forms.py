@@ -76,3 +76,6 @@ class ErrosForm(FlaskForm):
 
 
 # Formularios dos Relatorios
+class FormRomaneioSeparacao(FlaskForm):
+    onda_id = IntegerField('Onda')
+    submit = SubmitField('Gerar')

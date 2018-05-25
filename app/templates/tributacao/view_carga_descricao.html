@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+            <h3>{{ title }}</h3>
+            <hr />
+    </div>
+    {% include 'messages.html' %}
+    <div class="col-md-12">
+      {% import "bootstrap/utils.html" as utils %}
+      {% import "bootstrap/wtf.html" as wtf %}
+
+      {% if form %}
+      <form action="{{ url_for('tributacao.logistica_carga_descricao') }}" method="post" class="form-group">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens='only') }}
+
+        <div class="row">
+
+            <div class="row">
+              <div class="form-group col-md-8">
+              {{ wtf.form_field(form.descricao) }}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="form-group col-md-4">
+              {{ wtf.form_field(form.dt_inicial) }}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="form-group col-md-4">
+              {{ wtf.form_field(form.dt_final) }}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="form-group col-md-2">
+              {{ wtf.form_field(form.submit, class="btn btn-primary", onclick="loading();") }}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </form>
+      {% endif %}
+
+      <hr />
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  {% if form %}
+  $( function() {
+    $( "#{{ form.dt_inicial.id }}" ).datepicker({
+      dateFormat: "dd/mm/yy"
+    });
+    $( "#{{ form.dt_final.id }}" ).datepicker({
+      dateFormat: "dd/mm/yy"
+    });
+  } );
+  {% endif %}
+</script>
+{% endblock %}

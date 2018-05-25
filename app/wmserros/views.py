@@ -6,6 +6,7 @@ from flask import jsonify
 from flask.json import dumps
 import flask_excel as excel
 from flask_mail import Message
+from flask_weasyprint import HTML, render_pdf
 
 from datetime import datetime, date
 import calendar
@@ -30,10 +31,14 @@ from ..models import Tarefas, Erros, RegistroDeErros, WmsOnda, WmsColaborador
 from ..models import WmsItems, WmsSeparadoresTarefas, PontuacaoMetaLogistica
 from ..models import MetaTarefa, ParametrosMetas, WmsTarefasCd, WmsPredio, WmsRegiaoSeparacao
 from ..models import ViewSaldoProduto, ViewProduto, WmsEstoqueCd, EstoqueSaldo, StokyMetasView
+from app.models import WmsViewRomaneioSeparacao
 
 # Formularios
 from .forms import TarefasForm, ErrosForm, BuscarMetasForm
-from .forms import ParametrosForm, BuscarPeriodoForm
+from .forms import ParametrosForm, BuscarPeriodoForm, FormRomaneioSeparacao
+
+# import dos utils
+from app.utils.messages import success, warning, info, error
 
 TABLES = {'tarefas': {'classe': Tarefas, 'url_padrao': 'wmserros.tarefas'},
           'erros': {'classe': Erros, 'url_padrao': 'wmserros.erros'},
@@ -751,6 +756,55 @@ def exibir_erros():
     return render_template('wmserros/view_exibir_erros.html')
 
 
+@wmserros.route('/reports/romaneio-separacao', methods=['GET', 'POST'])
+def romaneio_separacao():
+    """
+        Gera o relatorio de separacao de produtos
+        dos itens que a regiao de separacao e feita
+        de forma manual
+    """
+    template = 'wmserros/romaneio-separacao.html'
+    form = FormRomaneioSeparacao()
+
+    if form.validate_on_submit():
+        onda_id = form.onda_id.data
+        onda = busar_romaneio_separacao(onda_id)
+
+        if onda:
+            return redirect(url_for('wmserros.relatorio_romaneio_separacao', onda_id=onda_id))
+        else:
+            warning('A onda informada não possui produtos para gerar romaneio.')
+            return redirect(url_for('wmserros.romaneio_separacao'))
+
+    result = {
+        'title': 'Romaneio de Separação',
+        'form': form
+    }
+    return render_template(template, **result)
+
+
+@wmserros.route('/reports/romaneio-separacao-pdf/<onda_id>', methods=['GET'])
+def relatorio_romaneio_separacao(onda_id):
+    """
+        gera em pdf
+    """
+    template = 'wmserros/reports/report-romaneio-separacao.html'
+    onda = busar_romaneio_separacao(onda_id)
+    datahora = datetime.now().strftime('%d/%m/%Y %H:%M')
+
+    if not onda:
+        warning('A onda informada não possui produtos para gerar romaneio.')
+        return redirect(url_for('wmserros.romaneio_separacao'))
+
+    result = {
+        'title': 'Relatorio Romaneio de Separação',
+        'onda': onda,
+        'datahora': datahora
+    }
+    html =  render_template(template, **result)
+    return render_pdf(HTML(string=html))
+
+
 def json_buscar_onda(id_onda):
     """
     Função usada para buscar o cliente pelo numero da Onda no WMS
@@ -863,3 +917,26 @@ def export():
             result.append(produto)
 
     return excel.make_response_from_array(result, "xlsx", file_name='rel.xlsx')
+
+
+def busar_romaneio_separacao(onda_id):
+    """
+        busca a onda com os produtos que
+        fazem separacao manual
+    """
+    onda = db.session.query(
+        WmsViewRomaneioSeparacao.onda_onda_id,
+        WmsViewRomaneioSeparacao.num_pedido,
+        WmsViewRomaneioSeparacao.nome_cliente,
+        WmsViewRomaneioSeparacao.dt_emissao,
+        WmsViewRomaneioSeparacao.cidade,
+        WmsViewRomaneioSeparacao.observacao,
+        WmsViewRomaneioSeparacao.cod_ciss,
+        WmsViewRomaneioSeparacao.descricao,
+        WmsViewRomaneioSeparacao.qtd,
+        WmsViewRomaneioSeparacao.unidade_medida
+    ).filter_by(
+        onda_onda_id=onda_id
+    ).all()
+
+    return onda
