@@ -936,7 +936,7 @@ def busar_romaneio_separacao(onda_id):
         WmsViewRomaneioSeparacao.qtd,
         WmsViewRomaneioSeparacao.unidade_medida
     ).filter_by(
-        onda_onda_id=onda_id
+        onda_onda_id=int(onda_id)
     ).all()
 
     return onda

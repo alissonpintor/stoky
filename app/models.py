@@ -489,7 +489,7 @@ class WmsViewRomaneioSeparacao(db.Model):
     __bind_key__ = 'wms'
 
     onda_onda_id = db.Column(db.Integer(), primary_key=True)
-    num_pedido = db.Column(db.Numeric(12,4))
+    num_pedido = db.Column(db.Integer())
     nome_cliente = db.Column(db.String(100))
     dt_emissao = db.Column(db.Date())
     cidade = db.Column(db.String(100))
