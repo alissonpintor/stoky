@@ -488,7 +488,7 @@ class WmsViewRomaneioSeparacao(db.Model):
     __tablename__ = 'STOKY_ROMANEIO_SEPARACAO'
     __bind_key__ = 'wms'
 
-    onda_onda_id = db.Column(db.Numeric(12,4), primary_key=True)
+    onda_onda_id = db.Column(db.Integer(), primary_key=True)
     num_pedido = db.Column(db.Numeric(12,4))
     nome_cliente = db.Column(db.String(100))
     dt_emissao = db.Column(db.Date())
