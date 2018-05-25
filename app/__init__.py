@@ -103,4 +103,4 @@ def page_not_found(error):
 
 @app.errorhandler(500)
 def page_not_found(error):
-    return render_template('errors_templates/unauthorized_access.html', error=error), 500
+    return render_template('errors_templates/error500.html', error=error), 500
