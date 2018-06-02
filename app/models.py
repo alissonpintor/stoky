@@ -1,7 +1,9 @@
 
-from flask_login import UserMixin
+from flask_login import UserMixin, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager, app
+from datetime import datetime
+
 
 # MODELS DO FLASK_LOGIN#######################################################
 class User(UserMixin, db.Model):
@@ -21,6 +23,15 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     is_admin = db.Column(db.Boolean, default=False)
+
+    @classmethod
+    def pegar_id(cls):
+        """
+            retorma o id do usuario logado
+        """
+        if hasattr(current_user, 'id'):
+            return current_user.id
+        return None
 
     @property
     def password(self):
@@ -64,6 +75,23 @@ class Role(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+class AppConfig(db.Model):
+    """
+        Table que contem dados de configuração
+        do sistema
+    """
+    __tablename__ = 'tbl_config'
+
+    config_id = db.Column(db.Integer, primary_key=True)
+    dthr_ultima_onda = db.Column(db.DateTime())
+
+    create = db.Column(db.DateTime(), default=datetime.now)
+    update = db.Column(db.DateTime(), onupdate=datetime.now)
+    last_user = db.Column(db.Integer, onupdate=User.pegar_id)
+
+
 
 # MODELS DO CISS ##############################################################
 class ClienteFornecedor(db.Model):
@@ -343,6 +371,17 @@ class RegistroDeErros(db.Model):
 
 	erro = db.relationship("Erros", backref=db.backref('id_registro', order_by=id_colaborador))
 
+
+class Carga(db.Model):
+    """
+        Model com o caminhao e periodo
+    """
+    carga_id = db.Column(db.Integer, primary_key=True)
+    caminhao_id = db.Column(db.Integer)
+    dt_inicial = db.Column(db.Date())
+    dt_final = db.Column(db.Date())
+
+
 # MODELS DO FULLWMS ---------------------------------------------------------------
 class WmsOnda(db.Model):
     __bind_key__ = 'wms'
@@ -498,4 +537,5 @@ class WmsViewRomaneioSeparacao(db.Model):
     descricao = db.Column(db.String(100))
     qtd = db.Column(db.String(100))
     unidade_medida = db.Column(db.String(10))
+    dthr_geracao = db.Column('DTHR', db.Date())
 

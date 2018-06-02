@@ -37,6 +37,9 @@ from app.models import WmsViewRomaneioSeparacao
 from .forms import TarefasForm, ErrosForm, BuscarMetasForm
 from .forms import ParametrosForm, BuscarPeriodoForm, FormRomaneioSeparacao
 
+# import das buscas na base de dados
+from .data import buscar_colaboradores_ativos
+
 # import dos utils
 from app.utils.messages import success, warning, info, error
 
@@ -89,94 +92,132 @@ def deletar(path, id):
         return redirect(url_for(TABLES[path]['url_padrao']))
 
 
+def delete(klass, id):
+    """
+        delete o registro da base de dados 
+    """
+    data = klass.by_id(id)
+    if not data:
+        error('Nao foi possivel excluir. Registro não existe')
+    else:
+        data = data.delete()
+        message = success if data.status else error
+        message(data.message)
+
+
 @wmserros.route('/parametros', methods=['GET', 'POST'])
 @wmserros.route('/parametros/<id>')
 @login_required
 @logistica_permission.require(http_exception=401)
 def parametros(id=None):
-    classe = 'parametros'
-    parametros = ParametrosMetas.query.all()
-    colaboradores = WmsColaborador.query.filter(WmsColaborador.ativo == 'S').order_by(WmsColaborador.nome)
+    template = 'wmserros/view_parametros.html'
+    parametros = ParametrosMetas.all()
+    
+    colaboradores = buscar_colaboradores_ativos()
+    choices = [(c.id, '{0:0>2} - {1}'.format(c.id, c.nome)) for c in colaboradores]
+    choices.insert(0, (0, ''))
 
     form = ParametrosForm()
-    form.colaboradores_excluidos.choices = [(c.id, '{0:0>2} - {1}'.format(c.id, c.nome)) for c in colaboradores]
-    form.colaboradores_excluidos.choices.insert(0, (0, ''))
+    form.colaboradores_excluidos.choices = choices
+
+    import cups
+    conn = cups.Connection()
+    conn.printTestPage('L655')
 
     if form.validate_on_submit():
-        param_obj = ParametrosMetas()
-        if form.id.data != 0:
-            param_obj = ParametrosMetas.query.filter_by(id = form.id.data).first()
+        parametro = ParametrosMetas()
+        if form.id.data:
+            parametro = ParametrosMetas.by_id(form.id.data)
 
-        param_obj.descricao = form.descricao.data
-        param_obj.colaboradores_excluidos = '-'.join([str(id) for id in form.colaboradores_excluidos.data])
-        param_obj.valor_meta_diario = form.valor_meta_diario.data
+        parametro.descricao = form.descricao.data
+        parametro.valor_meta_diario = form.valor_meta_diario.data
 
-        try:
-            db.session.add(param_obj)
-            db.session.commit()
-            message = {'type': 'success', 'content': 'Registro cadastrado com sucesso'}
-            flash(message)
+        excluidos = form.colaboradores_excluidos.data
+        excluidos = '-'.join([str(id) for id in excluidos])
+        parametro.colaboradores_excluidos = excluidos
+        
+        parametro = parametro.update()
+        message = success if parametro.status else error
+        message(parametro.message)
 
-            return redirect(url_for('wmserros.parametros'))
-
-        except Exception as e:
-            message = {'type': 'error', 'content': 'Não foi possível realizar o cadastro. Erro: {e}'.format(e)}
-            flash(message)
+        return redirect(url_for('wmserros.parametros'))
 
     if id:
-        param_obj = ParametrosMetas.query.filter_by(id = id).first()
-        form.id.data = param_obj.id
-        form.descricao.data = param_obj.descricao
-        lista_colaboradores_selecionados = [int(id) for id in param_obj.colaboradores_excluidos.split('-')]
-        form.colaboradores_excluidos.data = lista_colaboradores_selecionados
-        form.valor_meta_diario.data = param_obj.valor_meta_diario
+        parametro = ParametrosMetas.by_id(id)
+        excluidos = parametro.colaboradores_excluidos
+        excluidos = [int(id) for id in excluidos.split('-')]
+        
+        form.id.data = parametro.id
+        form.descricao.data = parametro.descricao
+        form.colaboradores_excluidos.data = excluidos
+        form.valor_meta_diario.data = parametro.valor_meta_diario
+    
+    result = {
+        'form': form,
+        'parametros': parametros
+    }
+    return render_template(template, **result)
 
-    return render_template('wmserros/view_parametros.html', form=form, parametros=parametros, classe=classe)
+
+@wmserros.route('/parametros/delete/<int:id>')
+@login_required
+@logistica_permission.require(http_exception=401)
+def parametros_delete(id=None):    
+    if id:
+        delete(ParametrosMetas, id)
+    return redirect(url_for('wmserros.parametros'))
+
 
 @wmserros.route('/tarefas', methods=['GET', 'POST'])
 @wmserros.route('/tarefas/<id>')
 @login_required
 @logistica_permission.require(http_exception=401)
 def tarefas(id=None):
-    tarefas = Tarefas.query.all()
+    template = 'wmserros/view_tarefas.html'
+    tarefas = Tarefas.all()
     form = TarefasForm()
     classe = 'tarefas'
 
     if form.validate_on_submit():
         tarefa = Tarefas()
+        
         if form.id_tarefa.data:
-            tarefa = Tarefas.query.filter(Tarefas.id_tarefa == form.id_tarefa.data).one()
+            tarefa = Tarefas.by_id(form.id_tarefa.data)
+        
+        if not tarefa:
+            warning('O registro não existe')
+            redirect(url_for('wmserros.tarefas'))
+        
         tarefa.descricao = form.nome_tarefa.data
         tarefa.lista_ids_wms = form.lista_ids_wms.data
         tarefa.valor_meta = form.valor_meta.data
         tarefa.flag_meta_variavel = form.flag_meta_variavel.data
         tarefa.qtdade_min_colaborador = form.qtdade_min_colaborador.data
 
-        try:
-            db.session.add(tarefa)
-            db.session.commit()
-            message = {'type': 'success', 'content': 'Registro cadastrado com sucesso'}
-            flash(message)
-        except Exception:
-            message = {'type': 'error', 'content': 'Não foi possível realizar o cadastro'}
-            flash(message)
+        tarefa = tarefa.update()
+        message = success if tarefa.status else error
+        message(tarefa.message)
 
         redirect(url_for('wmserros.tarefas'))
 
     if id:
-        try:
-            tarefa = Tarefas.query.filter(Tarefas.id_tarefa == id).one()
+        tarefa = Tarefas.by_id(id)
+
+        if tarefa:        
             form.id_tarefa.data = tarefa.id_tarefa
             form.nome_tarefa.data = tarefa.descricao
             form.lista_ids_wms.data = tarefa.lista_ids_wms
             form.valor_meta.data = tarefa.valor_meta
             form.flag_meta_variavel.data = tarefa.flag_meta_variavel
             form.qtdade_min_colaborador.data = tarefa.qtdade_min_colaborador
-        except Exception as e:
-            message = {'type': 'warning', 'content': 'Erro ao alterar registro. -- %s'%(e)}
-            flash(message)
+        
+    result = {
+        'form': form,
+        'tarefas': tarefas,
+        'classe': classe
+    }
+    return render_template(template, **result)
 
-    return render_template('wmserros/view_tarefas.html', form=form, tarefas=tarefas, classe=classe)
 
 @wmserros.route('/calculo_col_tarefas', methods=['GET', 'POST'])
 @login_required
@@ -802,6 +843,44 @@ def relatorio_romaneio_separacao(onda_id):
         'datahora': datahora
     }
     html =  render_template(template, **result)
+    
+    pdf = HTML(string=html).write_pdf()
+    f = open('saida.pdf', 'wb')
+    f.write(pdf)
+    f.close()
+
+    import cups
+    conn = cups.Connection()
+    conn.printFile('L655', 'saida.pdf', 'teste', {})
+
+    return render_pdf(HTML(string=html))
+
+
+@wmserros.route('/reports/romaneio-separacao-pdf/<onda_id>', methods=['GET'])
+def impressao_romaneio_separacao(onda):
+    """
+        gera em pdf
+    """
+    template = 'wmserros/reports/report-romaneio-separacao.html'
+    datahora = datetime.now().strftime('%d/%m/%Y %H:%M')
+
+    result = {
+        'title': 'Relatorio Romaneio de Separação',
+        'onda': onda,
+        'datahora': datahora
+    }
+    
+    html =  render_template(template, **result)
+    
+    pdf = HTML(string=html).write_pdf()
+    f = open('saida.pdf', 'wb')
+    f.write(pdf)
+    f.close()
+
+    import cups
+    conn = cups.Connection()
+    conn.printFile('ImpConf02', 'saida.pdf', 'Romaneio Separacao Onda', {})
+
     return render_pdf(HTML(string=html))
 
 

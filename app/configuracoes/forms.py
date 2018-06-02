@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, PasswordField, BooleanField
+from wtforms import DateTimeField
 from wtforms import IntegerField, ValidationError, SelectField
 from wtforms import SelectMultipleField
 from wtforms.validators import DataRequired, EqualTo
@@ -43,3 +44,15 @@ class RolesForm(FlaskForm):
     def validate_acesso(self, field):
         if Role.query.filter_by(name=field.data).first():
             raise ValidationError('O nome do acesso já esta existe.')
+
+
+class ConfigForm(FlaskForm):
+    """
+        Form para alterar as configurações do sistema
+    """
+    data_hora = DateTimeField(
+        'Data/Hora ultima Onda',
+        format='%d/%m/%Y %H:%M:%S',
+    )
+    submit = SubmitField('Alterar')
+

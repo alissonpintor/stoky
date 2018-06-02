@@ -27,6 +27,24 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+# tabelas que devem ser ignoradas pelo migrate
+tabelas_ignoradas = (
+    'WMS_COLABORADORES', 'STOKY_ONDAS_POR_CLIENTE', 'ITEM',
+    'WMS_REGIOES_SEPARACOES', 'WMS_ESTOQUES_CD', 'WMS_PREDIOS',
+    'STOKY_COLABORADOR_POR_TAREFA', 'WMS_TAREFAS_CD', 'PEDIDOS',
+    'WMS_ITENS_CHECKOUT', 'STOKY_ROMANEIO_SEPARACAO', 'STOKY_METAS',
+    'STOKY_ONDAS_POR_CLIENTE', 'MARCA', 'EMPRESA', 'PRODUTOS_SALDOS_VIEW',
+    'PRODUTOS_VIEW', 'PRODUTO_TRIBUTACAO_ESTADO', 'CONFERE_MERCADORIA',
+    'ESTOQUE_SALDO_ATUAL', 'PRODUTO_GRADE', 'PRODUTO', 'NCM', 
+    'CONFERE_AUTORIZA', 'CLIENTE_FORNECEDOR'
+)
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == 'table' and name in tabelas_ignoradas:
+        return False
+
+    return True
+
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -41,7 +59,10 @@ def run_migrations_offline():
 
     """
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(url=url)
+    context.configure(
+        url=url,
+        include_object=include_object
+    )
 
     with context.begin_transaction():
         context.run_migrations()
@@ -57,7 +78,7 @@ def run_migrations_online():
 
     # this callback is used to prevent an auto-migration from being generated
     # when there are no changes to the schema
-    # reference: http://alembic.readthedocs.org/en/latest/cookbook.html
+    # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
     def process_revision_directives(context, revision, directives):
         if getattr(config.cmd_opts, 'autogenerate', False):
             script = directives[0]
@@ -73,7 +94,8 @@ def run_migrations_online():
     context.configure(connection=connection,
                       target_metadata=target_metadata,
                       process_revision_directives=process_revision_directives,
-                      **current_app.extensions['migrate'].configure_args)
+                      **current_app.extensions['migrate'].configure_args,
+                      include_object=include_object)
 
     try:
         with context.begin_transaction():

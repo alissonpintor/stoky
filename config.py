@@ -7,6 +7,8 @@ class Config(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TEMPLATES_AUTO_RELOAD          = True
+    CELERY_BROKER_URL = 'redis://localhost:6379/0'
+    RESULT_BACKEND = 'redis://localhost:6379/0'
 
     # Put any configurations here that are common across all environments
 

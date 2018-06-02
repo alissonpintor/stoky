@@ -4,13 +4,16 @@ from flask import request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from . import configuracoes
-from ..models import User, Role
+from ..models import User, Role, AppConfig
 
 from sqlalchemy.orm import exc
 from sqlalchemy import exc as core_exc
 
 # Formularios
-from .forms import RegistrationForm, RolesForm
+from .forms import RegistrationForm, RolesForm, ConfigForm
+
+# import dos utils
+from app.utils.messages import success, info, warning, error
 
 import datetime
 import dateparser
@@ -128,3 +131,37 @@ def acessos(id=None):
         form.descricao.data = acesso.description
 
     return render_template('configuracoes/view_acessos.html', title='Cadastro de Acessos', acessos=acessos, form=form, classe=classe)
+
+
+@configuracoes.route('/configuracoes', methods=['GET', 'POST'])
+@login_required
+@admin_permission.require(http_exception=401)
+def configs():
+    """
+        Tela de alteração das configurações do Sistema
+    """
+    template = 'configuracoes/view_configuracoes.html'
+    form = ConfigForm()
+
+    config = AppConfig.query.filter_by(config_id=1).first()
+    if not config:
+        config = AppConfig()
+
+    if form.validate_on_submit():
+        
+        dthr = form.data_hora.data
+        config.dthr_ultima_onda = dthr
+        db.session.add(config)
+        db.session.commit()
+        
+        success('Registro Gravado com sucesso')
+        return redirect(url_for('configuracoes.configs'))
+    
+    if config.dthr_ultima_onda:
+        form.data_hora.data = config.dthr_ultima_onda
+
+    result = {
+        'title': 'Configurações do Sistema',
+        'form': form
+    }
+    return render_template(template, **result)

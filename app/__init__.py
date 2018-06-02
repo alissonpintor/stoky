@@ -23,11 +23,17 @@ login_manager.init_app(app)
 login_manager.login_message = {'type': 'warning', 'content': "Você precisa estar logado para acessar esta página."}
 login_manager.login_view = "auth.login"
 
-db = SQLAlchemy(app)
+from app.basemodel import BaseModel
+db = SQLAlchemy(app, model_class=BaseModel)
 migrate = Migrate(app, db)
 from app import models
 db.create_all(bind=None)
 
+# Incia o Celery
+from app.utils.celery import Task
+Task.set_celery(app)
+mycelery = Task.get_celery()
+from app.utils import tasks
 
 @event.listens_for(db.engine, "checkout")
 def ping_connection(dbapi_connection, connection_record, connection_proxy):
