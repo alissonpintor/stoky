@@ -5,7 +5,6 @@ class Config(object):
     Common configurations
     """
 
-    SERVER_NAME = 'http://192.168.104.24:5000/'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TEMPLATES_AUTO_RELOAD          = True
     CELERY_BROKER_URL = 'redis://localhost:6379/0'
