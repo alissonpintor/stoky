@@ -3,6 +3,7 @@ from flask_weasyprint import HTML, render_pdf
 from flask import render_template
 from datetime import datetime
 import cups
+import redis
 
 # importa o Celery
 from celery.schedules import crontab
@@ -12,45 +13,63 @@ from app import db
 # import das models usadas na view
 from app.models import AppConfig, WmsViewRomaneioSeparacao
 
+key = 'a8f5f167f44f4964e6c998dee827110c'
 
 @mycelery.task(name='imprimir_romaneio_onda')
 def imprimir_romaneio_onda():
-    config = buscar_dthr_ultima_onda()
-    if not config or not config.dthr_ultima_onda:
-        return
-
-    onda = busar_romaneio_separacao(config.dthr_ultima_onda, first=True)
-    if not onda:
-        return
-    ondas = busar_romaneio_separacao(config.dthr_ultima_onda)
+    # cria o mecanismo de bloqueio
+    REDIS_CLIENT = redis.Redis()
+    timeout = 60 * 5 #  expira em 5min
+    locked = False
+    lock = REDIS_CLIENT.lock(key, timeout=timeout)
     
-    ultima_hora = None
-    for i, onda in enumerate(ondas):
-        if i == 1:
-            ultima_hora = onda.dthr_geracao
+    try:
+        # tenta adiquirir o bloqueio da tarefa
+        locked = lock.acquire(blocking=False)
         
-        if ultima_hora < onda.dthr_geracao:
-            ultima_hora = onda.dthr_geracao
-        
-        html = template_romaneio_separacao(onda)
-        pdf = HTML(string=html).write_pdf()
-        
-        f = open('saida.pdf', 'wb')
-        f.write(pdf)
-        f.close()
+        # se o bloqueio foi bem sucedido executa a tarefa
+        if locked:
+            config = buscar_dthr_ultima_onda()
+            if not config or not config.dthr_ultima_onda:
+                return
 
-        default_printer = 'L655'
-        conn = cups.Connection()
-        printers = conn.getPrinters()
+            onda = busar_romaneio_separacao(config.dthr_ultima_onda, first=True)
+            if not onda:
+                return
+            ondas = busar_romaneio_separacao(config.dthr_ultima_onda)
+            
+            ultima_hora = config.dthr_ultima_onda
+            for i, onda in enumerate(ondas):
+                if i == 1:
+                    ultima_hora = onda.dthr_geracao
+                
+                if ultima_hora < onda.dthr_geracao:
+                    ultima_hora = onda.dthr_geracao
+                
+                html = template_romaneio_separacao(onda)
+                pdf = HTML(string=html).write_pdf()
+                
+                f = open('saida.pdf', 'wb')
+                f.write(pdf)
+                f.close()
 
-        if default_printer in printers.keys():
-            conn.printFile(default_printer, 'saida.pdf', 'Romaneio Separacao Onda', {})
-    
-    if ultima_hora:
-        config.dthr_ultima_onda = ultima_hora
-        db.session.add(config)
-        db.session.commit()
+                default_printer = 'L655'
+                conn = cups.Connection()
+                printers = conn.getPrinters()
 
+                if default_printer in printers.keys():
+                    conn.printFile(default_printer, 'saida.pdf', 'Romaneio Separacao Onda', {})
+            
+            if ultima_hora:
+                config.dthr_ultima_onda = ultima_hora
+                db.session.add(config)
+                db.session.commit()
+    finally:
+        print('Recurso Liberado')
+
+        # libera o bloqueio da tarefa
+        if locked:
+            lock.release()
 
 mycelery.conf.beat_schedule = {
     # Executa a impressao dos romaneios das 
