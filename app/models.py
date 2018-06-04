@@ -537,5 +537,5 @@ class WmsViewRomaneioSeparacao(db.Model):
     descricao = db.Column(db.String(100))
     qtd = db.Column(db.String(100))
     unidade_medida = db.Column(db.String(10))
-    dthr_geracao = db.Column('DTHR', db.Date())
+    dthr_geracao = db.Column('DTHR', db.DateTime())
 
