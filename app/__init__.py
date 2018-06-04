@@ -30,9 +30,11 @@ from app import models
 db.create_all(bind=None)
 
 # Incia o Celery
+from celery.schedules import crontab
 from app.utils.celery import make_celery
 mycelery = make_celery(app)
 from app.utils import tasks
+
 
 @event.listens_for(db.engine, "checkout")
 def ping_connection(dbapi_connection, connection_record, connection_proxy):
@@ -95,6 +97,27 @@ Bootstrap(app)
 @app.route('/')
 def index():
     return render_template('base.html')
+
+
+@app.route('/romaneio/<onda_id>', methods=['GET'])
+def romaneio(onda_id):
+    """
+        gera em pdf
+    """
+    from flask_weasyprint import HTML
+    from datetime import datetime
+    from app.wmserros.views import busar_romaneio_separacao
+
+    template = 'wmserros/reports/report-romaneio-separacao.html'
+    onda = busar_romaneio_separacao(onda_id)
+    datahora = datetime.now().strftime('%d/%m/%Y %H:%M')
+
+    result = {
+        'title': 'Relatorio Romaneio de Separação',
+        'onda': onda,
+        'datahora': datahora
+    }
+    return render_template(template, **result)
 
 
 # TEMPLATES PARA ERROS DE REQUISIÇÃO
