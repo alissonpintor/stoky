@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="static/css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="static/css/print.css">
+
+</head>
+<body>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header text-center" style="margin-top: 0">
+                <h3><small> {{ title }}</small></h3>
+                <p>Data e Hora: {{ datahora }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% for produto in onda %}
+    {% if loop.first %}
+    <div class="row">
+        <div class="col-xs-12">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <b>Onda: </b>{{ produto.onda_onda_id }}
+                </li>
+                <li class="list-group-item">
+                    <b>Data: </b>{{ produto.dt_emissao }}
+                </li>
+                <li class="list-group-item">
+                    <b>Cliente: </b>{{ produto.nome_cliente|title }}
+                </li>
+                <li class="list-group-item">
+                    <b>Pedido: </b>{{ produto.num_pedido }}
+                </li>
+                <li class="list-group-item">
+                    <b>Cidade: </b>{{ produto.cidade|title }}
+                </li>
+                <li class="list-group-item">
+                    {{ produto.observacao|title }}
+                </li>
+            </ul>
+        </div> 
+    {% endif %}
+        <div class="col-xs-12" style="margin-left: 0.1cm">{{ produto.descricao|title }}</div>
+        <div class="col-xs-4" style="margin-bottom: 0.3cm; margin-left: 0.1cm">
+            <b>Cod: </b>{{ produto.cod_ciss }}
+        </div>
+        <div class="col-xs-3" style="margin-bottom: 0.3cm">
+            <b> Qtd: </b>{{ produto.qtd }}
+        </div>
+        <div class="col-xs-3" style="margin-bottom: 0.3cm">
+            <b>Und: </b>{{ produto.unidade_medida|lower }}
+        </div>     
+    {% endfor %}
+    </div>   
+    <hr>
+</body>
+</html>

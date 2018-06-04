@@ -126,7 +126,7 @@ def template_romaneio_separacao(onda):
         gera em HTML para o pdf
     """
     env = Environment(
-        loader=PackageLoader('yourapplication', 'templates'),
+        loader=PackageLoader('app', 'templates'),
         autoescape=select_autoescape(['html', 'xml'])
     )
     
@@ -141,4 +141,5 @@ def template_romaneio_separacao(onda):
     }
     
     html =  template.render(**result)
+    print(html)
     return html
