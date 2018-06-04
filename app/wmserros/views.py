@@ -851,7 +851,7 @@ def relatorio_romaneio_separacao(onda_id):
 
     import cups
     conn = cups.Connection()
-    conn.printFile('L655', 'saida.pdf', 'teste', {})
+    conn.printFile('ImpConf02', 'saida.pdf', 'teste', {})
 
     return render_pdf(HTML(string=html))
 

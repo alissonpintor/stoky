@@ -7,6 +7,7 @@ import redis
 
 # importa o Celery
 from celery.schedules import crontab
+from app import app
 from app import mycelery
 from app import db
 
@@ -46,19 +47,20 @@ def imprimir_romaneio_onda():
                 if ultima_hora < onda.dthr_geracao:
                     ultima_hora = onda.dthr_geracao
                 
-                html = template_romaneio_separacao(onda)
-                pdf = HTML(string=html).write_pdf()
-                
-                f = open('saida.pdf', 'wb')
-                f.write(pdf)
-                f.close()
+                with app.test_request_context('/'):
+                    html = template_romaneio_separacao(onda)
+                    pdf = HTML(string=html).write_pdf()
+                    
+                    f = open('saida.pdf', 'wb')
+                    f.write(pdf)
+                    f.close()
 
-                default_printer = 'L655'
-                conn = cups.Connection()
-                printers = conn.getPrinters()
+                    default_printer = 'L655'
+                    conn = cups.Connection()
+                    printers = conn.getPrinters()
 
-                if default_printer in printers.keys():
-                    conn.printFile(default_printer, 'saida.pdf', 'Romaneio Separacao Onda', {})
+                    if default_printer in printers.keys():
+                        conn.printFile(default_printer, 'saida.pdf', 'Romaneio Separacao Onda', {})
             
             if ultima_hora:
                 config.dthr_ultima_onda = ultima_hora
@@ -123,6 +125,7 @@ def template_romaneio_separacao(onda):
     """
         gera em HTML para o pdf
     """
+    
     template = 'wmserros/reports/report-romaneio-separacao.html'
     datahora = datetime.now().strftime('%d/%m/%Y %H:%M')
 
@@ -132,6 +135,5 @@ def template_romaneio_separacao(onda):
         'datahora': datahora
     }
     
-    html =  render_template(template, **result)
-    
+    html =  render_template(template, **result)    
     return html
