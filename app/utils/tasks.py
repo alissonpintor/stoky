@@ -141,7 +141,7 @@ def busar_romaneio_separacao(db, dthr_geracao, first=False):
         WmsViewRomaneioSeparacao.dthr_geracao
     ).filter(
         WmsViewRomaneioSeparacao.dthr_geracao > dthr_geracao
-    )
+    ).distinct()
 
     if first:
         onda = onda.first()
