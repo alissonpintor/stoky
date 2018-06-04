@@ -7,9 +7,9 @@ import redis
 
 # importa o Celery
 from celery.schedules import crontab
-from app import app
 from app import mycelery
-from app import db
+from app import app
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 # import das models usadas na view
 from app.models import AppConfig, WmsViewRomaneioSeparacao
@@ -18,6 +18,7 @@ key = 'a8f5f167f44f4964e6c998dee827110c'
 
 @mycelery.task(name='imprimir_romaneio_onda')
 def imprimir_romaneio_onda():
+    from app import db
     # cria o mecanismo de bloqueio
     REDIS_CLIENT = redis.Redis()
     timeout = 60 * 5 #  expira em 5min
@@ -34,10 +35,10 @@ def imprimir_romaneio_onda():
             if not config or not config.dthr_ultima_onda:
                 return
 
-            onda = busar_romaneio_separacao(config.dthr_ultima_onda, first=True)
+            onda = busar_romaneio_separacao(db, config.dthr_ultima_onda, first=True)
             if not onda:
                 return
-            ondas = busar_romaneio_separacao(config.dthr_ultima_onda)
+            ondas = busar_romaneio_separacao(db, config.dthr_ultima_onda)
             
             ultima_hora = config.dthr_ultima_onda
             for i, onda in enumerate(ondas):
@@ -47,20 +48,19 @@ def imprimir_romaneio_onda():
                 if ultima_hora < onda.dthr_geracao:
                     ultima_hora = onda.dthr_geracao
                 
-                with app.test_request_context('/'):
-                    html = template_romaneio_separacao(onda)
-                    pdf = HTML(string=html).write_pdf()
-                    
-                    f = open('saida.pdf', 'wb')
-                    f.write(pdf)
-                    f.close()
+                html = template_romaneio_separacao(onda)
+                pdf = HTML(string=html).write_pdf()
+                
+                f = open('saida.pdf', 'wb')
+                f.write(pdf)
+                f.close()
 
-                    default_printer = 'L655'
-                    conn = cups.Connection()
-                    printers = conn.getPrinters()
+                default_printer = 'L655'
+                conn = cups.Connection()
+                printers = conn.getPrinters()
 
-                    if default_printer in printers.keys():
-                        conn.printFile(default_printer, 'saida.pdf', 'Romaneio Separacao Onda', {})
+                if default_printer in printers.keys():
+                    conn.printFile(default_printer, 'saida.pdf', 'Romaneio Separacao Onda', {})
             
             if ultima_hora:
                 config.dthr_ultima_onda = ultima_hora
@@ -92,7 +92,7 @@ def buscar_dthr_ultima_onda():
     return config
 
 
-def busar_romaneio_separacao(dthr_geracao, first=False):
+def busar_romaneio_separacao(db, dthr_geracao, first=False):
     """
         busca a onda com os produtos que
         fazem separacao manual
@@ -125,8 +125,13 @@ def template_romaneio_separacao(onda):
     """
         gera em HTML para o pdf
     """
+    env = Environment(
+        loader=PackageLoader('yourapplication', 'templates'),
+        autoescape=select_autoescape(['html', 'xml'])
+    )
     
     template = 'wmserros/reports/report-romaneio-separacao.html'
+    template = env.get_template(template)
     datahora = datetime.now().strftime('%d/%m/%Y %H:%M')
 
     result = {
@@ -135,5 +140,5 @@ def template_romaneio_separacao(onda):
         'datahora': datahora
     }
     
-    html =  render_template(template, **result)    
+    html =  template.render(**result)
     return html

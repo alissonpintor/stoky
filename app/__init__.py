@@ -30,9 +30,8 @@ from app import models
 db.create_all(bind=None)
 
 # Incia o Celery
-from app.utils.celery import Task
-Task.set_celery(app)
-mycelery = Task.get_celery()
+from app.utils.celery import make_celery
+mycelery = make_celery(app)
 from app.utils import tasks
 
 @event.listens_for(db.engine, "checkout")
