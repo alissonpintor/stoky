@@ -36,11 +36,11 @@ def imprimir_romaneio_onda(self):
                 if not config or not config.dthr_ultima_onda:
                     return
 
-                onda = busar_romaneio_separacao(db, config.dthr_ultima_onda, first=True)
+                onda = busar_id_romaneio_separacao(db, config.dthr_ultima_onda, first=True)
                 if not onda:
                     return
                 
-                ondas = busar_romaneio_separacao(db, config.dthr_ultima_onda)            
+                ondas = busar_id_romaneio_separacao(db, config.dthr_ultima_onda)            
                 ultima_hora = config.dthr_ultima_onda
                 
                 for i, onda in enumerate(ondas):
@@ -72,7 +72,10 @@ def imprimir_romaneio_onda(self):
                     db.session.add(config)
                     db.session.commit()
     finally:
-        print('Recurso Liberado')
+        if locked:
+            print('Recurso Liberado')
+        else:
+            print('Recurso esta bloqueado por outro processo')
 
         # libera o bloqueio da tarefa
         if locked:

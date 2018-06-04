@@ -108,7 +108,7 @@ def romaneio(onda_id):
     from datetime import datetime
     from app.wmserros.views import busar_romaneio_separacao
 
-    template = 'wmserros/reports/report-romaneio-separacao.html'
+    template = 'wmserros/reports/report-task.html'
     onda = busar_romaneio_separacao(onda_id)
     datahora = datetime.now().strftime('%d/%m/%Y %H:%M')
 
@@ -132,3 +132,6 @@ def page_not_found(error):
 @app.errorhandler(500)
 def page_not_found(error):
     return render_template('errors_templates/error500.html', error=error), 500
+
+app.jinja_env.filters['date'] = lambda x: x.strftime('%d/%m/%Y')
+app.jinja_env.filters['datetime'] = lambda x: x.strftime('%d/%m/%Y %H:%M')

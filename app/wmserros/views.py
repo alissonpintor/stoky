@@ -829,7 +829,7 @@ def relatorio_romaneio_separacao(onda_id):
     """
         gera em pdf
     """
-    template = 'wmserros/reports/report-romaneio-separacao.html'
+    template = 'wmserros/reports/report-task.html'
     onda = busar_romaneio_separacao(onda_id)
     datahora = datetime.now().strftime('%d/%m/%Y %H:%M')
 
@@ -861,7 +861,7 @@ def impressao_romaneio_separacao(onda):
     """
         gera em pdf
     """
-    template = 'wmserros/reports/report-romaneio-separacao.html'
+    template = 'wmserros/reports/report-task.html'
     datahora = datetime.now().strftime('%d/%m/%Y %H:%M')
 
     result = {

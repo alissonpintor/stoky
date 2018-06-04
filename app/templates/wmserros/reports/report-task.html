@@ -5,31 +5,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{ title }}</title>
-    <link rel="stylesheet" type="text/css" href="./static/css/normalize.css">
-    <link rel="stylesheet" type="text/css" href="./static/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="./static/css/print.css">
 
+    <style>
+    @page { 
+        size: 80mm 30cm; 
+        margin: 0.2cm 
+    }
+
+    @media print {
+        body {
+            font-size: 12px;
+            font-family: Helvetica, Arial, sans-serif !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        .content {
+            margin: 0 auto
+        }
+
+        h1, h2, h3, h4, h5 {
+            text-align: center;
+            padding-bottom: 0.3cm;
+            border-bottom: 3px solid black
+        }
+
+        .data-hora {
+            text-align: center
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 10px
+        }
+
+        ul li {
+            padding: 5px 10px;
+            border-bottom: 1px solid black;
+        }
+
+        ul li:last-child {
+            border: 1px dotted black;
+            border-radius: 5px;
+            padding: 5px;
+            padding-bottom: 15px;
+            margin-top: 5px
+        }
+
+        .item {
+            width: 95%;
+            margin: 0 auto;
+            margin-bottom: 5px;
+            padding-bottom: 8px;
+            text-align: center;
+            border-bottom: 1px solid black;
+        }
+
+        .item::after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+
+        .item .descricao {
+            float: left;
+            width: 100%;
+            margin-bottom: 5px
+        }
+
+        .item .cod {
+            float: left;
+            width: 33.33%;
+        }
+
+        .item .qtd {
+            float: left;
+            width: 33.33%;
+        }
+
+        .item .und {
+            float: left;
+            width: 33.33%;
+        }
+    }
+    </style>
 </head>
 <body>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="page-header text-center" style="margin-top: 0">
-                <h3><small> {{ title }}</small></h3>
-                <p>Data e Hora: {{ datahora }}</p>
-            </div>
-        </div>
-    </div>
+    <div class="content">
+        <h3><small> {{ title }}</small></h3>
+        <p class="data-hora">Data e Hora: {{ datahora }}</p>
 
-    {% for produto in onda %}
-    {% if loop.first %}
-    <div class="row">
-        <div class="col-xs-12">
+        {% for produto in onda %}
+        {% if loop.first %}
             <ul class="list-group">
                 <li class="list-group-item">
                     <b>Onda: </b>{{ produto.onda_onda_id }}
                 </li>
                 <li class="list-group-item">
-                    <b>Data: </b>{{ produto.dt_emissao }}
+                    <b>Data: </b>{{ produto.dt_emissao|date }}
                 </li>
                 <li class="list-group-item">
                     <b>Cliente: </b>{{ produto.nome_cliente|title }}
@@ -43,21 +117,16 @@
                 <li class="list-group-item">
                     {{ produto.observacao|title }}
                 </li>
-            </ul>
-        </div> 
-    {% endif %}
-        <div class="col-xs-12" style="margin-left: 0.1cm">{{ produto.descricao|title }}</div>
-        <div class="col-xs-4" style="margin-bottom: 0.3cm; margin-left: 0.1cm">
-            <b>Cod: </b>{{ produto.cod_ciss }}
-        </div>
-        <div class="col-xs-3" style="margin-bottom: 0.3cm">
-            <b> Qtd: </b>{{ produto.qtd }}
-        </div>
-        <div class="col-xs-3" style="margin-bottom: 0.3cm">
-            <b>Und: </b>{{ produto.unidade_medida|lower }}
-        </div>     
-    {% endfor %}
-    </div>   
-    <hr>
+            </ul> 
+        {% endif %}
+            <div class="item">
+                <div class="descricao">{{ produto.descricao|title }}</div>
+                <div class="cod"><b>Cod: </b>{{ produto.cod_ciss }}</div>
+                <div class="qtd"><b> Qtd: </b>{{ produto.qtd }}</div>
+                <div class="und"><b>Und: </b>{{ produto.unidade_medida|lower }}</div>
+            </div>    
+        {% endfor %}
+    </div>
+    
 </body>
 </html>
