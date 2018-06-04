@@ -58,7 +58,7 @@ def imprimir_romaneio_onda(self):
                     f.write(pdf)
                     f.close()
 
-                    default_printer = 'L655'
+                    default_printer = 'ImpConf02'
                     conn = cups.Connection()
                     printers = conn.getPrinters()
 
@@ -112,7 +112,7 @@ def busar_id_romaneio_separacao(db, dthr_geracao, first=False):
         WmsViewRomaneioSeparacao.dthr_geracao
     ).filter(
         WmsViewRomaneioSeparacao.dthr_geracao > dthr_geracao
-    )
+    ).distinct()
 
     if first:
         onda = onda.first()
