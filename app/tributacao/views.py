@@ -83,7 +83,7 @@ def ajusta_tributacao():
                         pt.per_icms_ent = 0
                         pt.per_margem_subst = 45 if radio_cgmedia == 'F' else 0
                         pt.per_icms_subst = 7 if radio_cgmedia == 'F' else 0
-                        pt.per_margem_original = 45 if radio_cgmedia == 'F' else 0
+                        pt.per_margem_original = 0
                         pt.tipo_trib_ent = 'F' if radio_subst == 'T' else 'T'
                         pt.id_sit_trib = 60 if radio_subst == 'T' else 90
 
