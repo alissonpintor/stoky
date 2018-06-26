@@ -119,7 +119,6 @@ def romaneio(onda_id):
     }
     return render_template(template, **result)
 
-
 # TEMPLATES PARA ERROS DE REQUISIÇÃO
 @app.errorhandler(404)
 def page_not_found(error):
